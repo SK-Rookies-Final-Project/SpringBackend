@@ -19,10 +19,20 @@ public class AuditLogConsumer {
     private String topics;
 
     public String[] getTopics(){
-        return Arrays.stream(topics.split(","))
-                .map(String::trim)
+        String raw = topics.trim();
+        //앞뒤 따옴표 제거
+        if((raw.startsWith("'") && raw.endsWith("'")) ||
+                (raw.startsWith("\"")) && raw.endsWith("\"")){
+            raw = raw.substring(1, raw.length() -1);
+        }
+        //여러 개 받을 수 있어서 배열로 반환
+        return Arrays.stream(raw.split(","))
+                // 공백 제거
+                .map(String::trim)  //String::trim==s -> s.trim()
+                //빈 문자열 제거
                 .filter(s -> !s.isEmpty())
-                .toArray(String[]::new);
+                //배열 생성
+                .toArray(String[]::new); //String[]::new == size -> new String[size]
     }
 
     @KafkaListener(
