@@ -27,8 +27,8 @@ public class AuditLogConsumer {
         }
         //여러 개 받을 수 있어서 배열로 반환
         return Arrays.stream(raw.split(","))
-                // 공백 제거
-                .map(String::trim)  //String::trim==s -> s.trim()
+                //공백 제거 // String::trim과 s -> s.trim()은 동일
+                .map(String::trim)
                 //빈 문자열 제거
                 .filter(s -> !s.isEmpty())
                 //배열 생성
