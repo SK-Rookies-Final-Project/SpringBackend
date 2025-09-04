@@ -18,7 +18,7 @@ public class KafkaSecurityAuditLogController {
     @Value("${CLUSTER_ID}")
     private String clusterId;
 
-    // 1. 실시간 스트리밍 API
+    // 1. 실시간 스트리밍 API: 정제 전 데이터
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getStreamLogs(
             @RequestParam(required = false) String topics, // 필터링 할 토픽 목록(쉼표로 구분)
@@ -39,6 +39,9 @@ public class KafkaSecurityAuditLogController {
 
         return emitter;
     }
+//    // 1-1. 실시간 스트리밍 API: 정제 후 데이터
+//    @GetMapping("/stream/no-auth")
+
 
     // 2. 감사 로그 조회 API
 //    @GetMapping("/logs")

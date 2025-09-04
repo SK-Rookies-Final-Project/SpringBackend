@@ -15,7 +15,10 @@ import java.util.Arrays;
 @Service
 public class AuditLogConsumer {
 
-    @Value("${KAFKA_TOPIC_UNAUTHORIZED}")
+//    @Value("${KAFKA_TOPIC_UNAUTHORIZED}")
+//    private String topics;
+
+    @Value("${KAFKA_TOPIC_AUDIT_LOG}")
     private String topics;
 
     public String[] getTopics(){
