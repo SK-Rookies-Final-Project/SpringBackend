@@ -1,8 +1,6 @@
 package com.finalproject.springbackend.service;
 
 import com.finalproject.springbackend.controller.KafkaSecurityAuditLogController;
-
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -10,50 +8,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 @Service
 public class AuditLogConsumer {
 
-//    @Value("${KAFKA_TOPIC_UNAUTHORIZED}")
-//    private String topics;
-
-    @Value("${KAFKA_TOPIC_AUDIT_LOG}")
-    private String topics;
-
-    public String[] getTopics(){
-        String raw = topics.trim();
-        //앞뒤 따옴표 제거
-        if((raw.startsWith("'") && raw.endsWith("'")) ||
-                (raw.startsWith("\"")) && raw.endsWith("\"")){
-            raw = raw.substring(1, raw.length() -1);
-        }
-        //여러 개 받을 수 있어서 배열로 반환
-        return Arrays.stream(raw.split(","))
-                //공백 제거 // String::trim과 s -> s.trim()은 동일
-                .map(String::trim)
-                //빈 문자열 제거
-                .filter(s -> !s.isEmpty())
-                //배열 생성
-                .toArray(String[]::new); //String[]::new == size -> new String[size]
-    }
-
+    // 방법 1: 직접 property placeholder 사용 (가장 간단)
     @KafkaListener(
-            topics = "#{__listener.getTopics()}",
+            topics = "${KAFKA_TOPIC_AUDIT_LOG}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(String message) {
-        System.out.println("Consumed message: " + message);
+//        System.out.println("Consumed message: " + message);
 
         // 연결되어 있는 모든 클라이언트에게 메세지 전송
         KafkaSecurityAuditLogController.sseEmitters.forEach((id, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
-                        .name("log-event")//로그 이벤트 명("log-event")이 찍힘
-                        .data(message, MediaType.APPLICATION_JSON)); // Kafka에서 받은 메시지를 그대로 전달
+                        .name("log-event")
+                        .data(message, MediaType.APPLICATION_JSON));
             } catch (IOException e) {
                 System.err.println("Error sending message to client: " + id);
+                // 에러 발생한 emitter 제거
+                KafkaSecurityAuditLogController.sseEmitters.remove(id);
             }
         });
     }
+
 }
