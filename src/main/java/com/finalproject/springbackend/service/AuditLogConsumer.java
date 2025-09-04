@@ -43,7 +43,7 @@ public class AuditLogConsumer {
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void consume(String message) {
-        System.out.println("Consumed message: " + message);
+//        System.out.println("Consumed message: " + message);
 
         // 연결되어 있는 모든 클라이언트에게 메세지 전송
         KafkaSecurityAuditLogController.sseEmitters.forEach((id, emitter) -> {

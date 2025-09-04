@@ -39,9 +39,6 @@ public class KafkaSecurityAuditLogController {
 
         return emitter;
     }
-//    // 1-1. 실시간 스트리밍 API: 정제 후 데이터
-//    @GetMapping("/stream/no-auth")
-
 
     // 2. 감사 로그 조회 API
 //    @GetMapping("/logs")
