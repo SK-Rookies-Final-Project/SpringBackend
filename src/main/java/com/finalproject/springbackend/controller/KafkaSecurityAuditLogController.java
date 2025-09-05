@@ -1,5 +1,7 @@
 package com.finalproject.springbackend.controller;
 
+import com.finalproject.springbackend.dto.LogsRequestDTO;
+import com.finalproject.springbackend.dto.LogsResponseDTO;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -40,10 +42,10 @@ public class KafkaSecurityAuditLogController {
         return emitter;
     }
 
-    // 2. 감사 로그 조회 API
+//    // 2. 감사 로그 조회 API
 //    @GetMapping("/logs")
-//    public String getlogs(){
-//        return
+//    public LogsResponseDTO getlogs(@ModelAttribute LogsRequestDTO logs){
+//
 //    }
 
     // 3. 개별 로그 조회 API
@@ -69,5 +71,31 @@ public class KafkaSecurityAuditLogController {
 //    public String getStats(){
 //
 //    }
+
+    /**추가한거*/
+//    // 1. 로그인 성공
+//    // "authorized-access"에서 consume
+//    @GetMapping("/auth")
+//    public String accessTrue(){
+//
+//    }
+
+//    // 2. 로그인 비인가 권한 없는 행동 할 때
+//    // "unauthorized-access"에서 consume
+//    @GetMapping("/unauth")
+//    public String accessFalse(){
+//
+//    }
+
+//    // 3. 없는 계정으로 로그인 시도
+//    // "access-failed"에서 consume
+//    @GetMapping("/auth_failed")
+//    public String authFailed(){
+//
+//    }
+
+
+
+
 
 }

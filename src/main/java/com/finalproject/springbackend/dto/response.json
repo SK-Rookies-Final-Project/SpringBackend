@@ -1,0 +1,40 @@
+{
+  "content": [
+    {
+      "id": "audit-log-12345",
+      "time": "2025-08-29T01:50:50.760367922Z",
+      "data": {
+        "methodName": "mds.Authorize",
+        "resourceName": "crn:///kafka=AxnoBSObR_61RbcdJzp5Iw/security-metadata=security-metadata",
+        "authenticationInfo": {
+          "principal": "User:dr"
+        },
+        "authorizationInfo": {
+          "granted": false,
+          "resourceType": "SecurityMetadata",
+          "resourceName": "security-metadata"
+        },
+        "clientAddress": [
+          {
+            "ip": "127.0.0.1"
+          }
+        ]
+      },
+      "processingTime": "2025-08-29T01:50:50.760367922Z"
+    }
+  ],
+  "pageable": {
+    "page": 0,
+    "size": 20,
+    "sort": {
+      "sorted": true,
+      "by": "time",
+      "direction": "DESC"
+    }
+  },
+  "totalElements": 1523,
+  "totalPages": 77,
+  "first": true,
+  "last": false,
+  "numberOfElements": 20
+}
