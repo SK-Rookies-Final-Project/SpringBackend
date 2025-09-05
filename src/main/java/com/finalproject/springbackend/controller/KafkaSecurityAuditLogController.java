@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class KafkaSecurityAuditLogController {
 
     public static Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+
+    public static Map<String, SseEmitter> sseEmittersLoginAccess = new ConcurrentHashMap<>();
 
     @Value("${CLUSTER_ID}")
     private String clusterId;
@@ -42,57 +45,85 @@ public class KafkaSecurityAuditLogController {
         return emitter;
     }
 
+
+    /**추가한거*/
+    // 1. 로그인 성공
+    // topic명: "authorized-access"에서 consume
+    @GetMapping(value = "/auth", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getAuthorizedAccess() {
+       String clientId = java.util.UUID.randomUUID().toString();
+
+       SseEmitter emitter = new SseEmitter(0L);
+
+       sseEmittersLoginAccess.put(clientId, emitter);
+
+       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+
+       return emitter;
+    }
+
+//    // 2. 로그인 비인가 권한 없는 행동 할 때
+//    // topic명: "unauthorized-access"에서 consume
+    @GetMapping(value = "/unauth", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getUnauthorizedAccess() {
+       String clientId = java.util.UUID.randomUUID().toString();
+
+       SseEmitter emitter = new SseEmitter(0L);
+
+       sseEmittersLoginAccess.put(clientId, emitter);
+
+       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+
+       return emitter;
+    }
+
+    @GetMapping(value = "/auth_failed", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getAuthFailed() {
+       String clientId = java.util.UUID.randomUUID().toString();
+
+       SseEmitter emitter = new SseEmitter(0L);
+
+       sseEmittersLoginAccess.put(clientId, emitter);
+
+       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+
+       return emitter;
+    }
+
+
 //    // 2. 감사 로그 조회 API
 //    @GetMapping("/logs")
-//    public LogsResponseDTO getlogs(@ModelAttribute LogsRequestDTO logs){
+//    public List<LogsResponseDTO> getLogs(@ModelAttribute LogsRequestDTO logs) {
 //
 //    }
 
-    // 3. 개별 로그 조회 API
+//    // 3. 개별 로그 조회 API
 //    @GetMapping("/logs/{id}")
-//    public String getLogById(@PathVariable String id){
+//    public LogsResponseDTO getLogById(@PathVariable String id){
 //
 //    }
 
-    // 4. 사용자 목록 조회 API
+//    // 4. 사용자 목록 조회 API
 //    @GetMapping("/users")
 //    public String getUsers(){
 //
 //    }
 
-    // 5. 토픽 목록 조회 API
+//    // 5. 토픽 목록 조회 API
 //    @GetMapping("/topics")
 //    public String getTopics(){
 //
 //    }
 
-    // 6. 통계 조회 API
+//    // 6. 통계 조회 API
 //    @GetMapping("/stats")
 //    public String getStats(){
 //
 //    }
 
-    /**추가한거*/
-//    // 1. 로그인 성공
-//    // "authorized-access"에서 consume
-//    @GetMapping("/auth")
-//    public String accessTrue(){
-//
-//    }
-
-//    // 2. 로그인 비인가 권한 없는 행동 할 때
-//    // "unauthorized-access"에서 consume
-//    @GetMapping("/unauth")
-//    public String accessFalse(){
-//
-//    }
-
-//    // 3. 없는 계정으로 로그인 시도
-//    // "access-failed"에서 consume
-//    @GetMapping("/auth_failed")
-//    public String authFailed(){
-//
-//    }
 
 
 
