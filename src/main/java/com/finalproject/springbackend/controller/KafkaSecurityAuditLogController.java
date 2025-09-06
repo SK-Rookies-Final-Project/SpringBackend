@@ -1,139 +1,47 @@
 package com.finalproject.springbackend.controller;
 
-import com.finalproject.springbackend.dto.LogsRequestDTO;
-import com.finalproject.springbackend.dto.LogsResponseDTO;
-import lombok.*;
+import com.finalproject.springbackend.service.SseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 @RestController
 @RequestMapping("/api/kafka")
+@RequiredArgsConstructor
 public class KafkaSecurityAuditLogController {
 
-    public static Map<String, SseEmitter> sseEmittersRaw = new ConcurrentHashMap<>();
-
-    public static Map<String, SseEmitter> sseEmittersAuthorized = new ConcurrentHashMap<>();
-
-    public static Map<String, SseEmitter> sseEmittersUnauthorized = new ConcurrentHashMap<>();
-
-    public static Map<String, SseEmitter> sseEmittersAuthFailed = new ConcurrentHashMap<>();
-
+    private final SseService sseService;
+    
     @Value("${CLUSTER_ID}")
     private String clusterId;
 
     // 1. 실시간 스트리밍 API: 정제 전 데이터
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getStreamLogs(
-            @RequestParam(required = false) String topics, // 필터링 할 토픽 목록(쉼표로 구분)
-            @RequestParam(required = false) String users,  // 필터링 할 사용자 목록(쉼표로 구분)
-            @RequestParam(required = false) String status  // 권한 상태 필터 (granted, denied)
+            @RequestParam(required = false) String topics,
+            @RequestParam(required = false) String users,
+            @RequestParam(required = false) String status
     ) {
-
-        String clientId= java.util.UUID.randomUUID().toString();
-
-        SseEmitter emitter = new SseEmitter(0L);
-
-        // 1. 새로운 클라이언트의 Emitter를 Map에 추가
-        sseEmittersRaw.put(clientId, emitter);
-
-        // 2. 연결이 끊어지거나 타임아웃되면 Map에서 제거
-        emitter.onCompletion(() -> sseEmittersRaw.remove(clientId));
-        emitter.onTimeout(() -> sseEmittersRaw.remove(clientId));
-
-        return emitter;
+        return sseService.createRawLogStream();
     }
 
-
-    /**추가한거*/
-    // 1. 로그인 성공
-    // topic명: "authorized-access"에서 consume
+    // 2. 인증된 접근 로그 스트리밍
     @GetMapping(value = "/auth", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getAuthorizedAccess() {
-       String clientId = java.util.UUID.randomUUID().toString();
-
-       SseEmitter emitter = new SseEmitter(0L);
-
-       sseEmittersAuthorized.put(clientId, emitter);
-
-       emitter.onCompletion(() -> sseEmittersAuthorized.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersAuthorized.remove(clientId));
-
-       return emitter;
+        return sseService.createAuthorizedStream();
     }
 
-//    // 2. 로그인 비인가 권한 없는 행동 할 때
-//    // topic명: "unauthorized-access"에서 consume
+    // 3. 인증되지 않은 접근 로그 스트리밍
     @GetMapping(value = "/unauth", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getUnauthorizedAccess() {
-       String clientId =  java.util.UUID.randomUUID().toString();
-
-       SseEmitter emitter = new SseEmitter(0L);
-
-       sseEmittersUnauthorized.put(clientId, emitter);
-
-       emitter.onCompletion(() -> sseEmittersUnauthorized.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersUnauthorized.remove(clientId));
-
-       return emitter;
+        return sseService.createUnauthorizedStream();
     }
 
-    // 3. api/kafka/auth_failed
-    // -> 없는 계정 로그인 시도
-    // topic명: "access-failed"에서 consume
+    // 4. 인증 실패 로그 스트리밍
     @GetMapping(value = "/auth_failed", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getAuthFailed() {
-       String clientId = java.util.UUID.randomUUID().toString();
-
-       SseEmitter emitter = new SseEmitter(0L);
-
-       sseEmittersAuthFailed.put(clientId, emitter);
-
-       emitter.onCompletion(() -> sseEmittersAuthFailed.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersAuthFailed.remove(clientId));
-
-       return emitter;
+        return sseService.createAuthFailedStream();
     }
-
-
-//    // 2. 감사 로그 조회 API
-//    @GetMapping("/logs")
-//    public List<LogsResponseDTO> getLogs(@ModelAttribute LogsRequestDTO logs) {
-//
-//    }
-
-//    // 3. 개별 로그 조회 API
-//    @GetMapping("/logs/{id}")
-//    public LogsResponseDTO getLogById(@PathVariable String id){
-//
-//    }
-
-//    // 4. 사용자 목록 조회 API
-//    @GetMapping("/users")
-//    public String getUsers(){
-//
-//    }
-
-//    // 5. 토픽 목록 조회 API
-//    @GetMapping("/topics")
-//    public String getTopics(){
-//
-//    }
-
-//    // 6. 통계 조회 API
-//    @GetMapping("/stats")
-//    public String getStats(){
-//
-//    }
-
-
-
-
-
-
 }
