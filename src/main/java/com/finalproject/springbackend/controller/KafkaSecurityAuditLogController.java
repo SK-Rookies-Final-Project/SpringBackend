@@ -16,9 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/api/kafka")
 public class KafkaSecurityAuditLogController {
 
-    public static Map<String, SseEmitter> sseEmitters = new ConcurrentHashMap<>();
+    public static Map<String, SseEmitter> sseEmittersRaw = new ConcurrentHashMap<>();
 
-    public static Map<String, SseEmitter> sseEmittersLoginAccess = new ConcurrentHashMap<>();
+    public static Map<String, SseEmitter> sseEmittersAuthorized = new ConcurrentHashMap<>();
+
+    public static Map<String, SseEmitter> sseEmittersUnauthorized = new ConcurrentHashMap<>();
+
+    public static Map<String, SseEmitter> sseEmittersAuthFailed = new ConcurrentHashMap<>();
 
     @Value("${CLUSTER_ID}")
     private String clusterId;
@@ -31,16 +35,16 @@ public class KafkaSecurityAuditLogController {
             @RequestParam(required = false) String status  // 권한 상태 필터 (granted, denied)
     ) {
 
-        String clientId=clusterId;
+        String clientId= java.util.UUID.randomUUID().toString();
 
         SseEmitter emitter = new SseEmitter(0L);
 
         // 1. 새로운 클라이언트의 Emitter를 Map에 추가
-        sseEmitters.put(clientId, emitter);
+        sseEmittersRaw.put(clientId, emitter);
 
         // 2. 연결이 끊어지거나 타임아웃되면 Map에서 제거
-        emitter.onCompletion(() -> sseEmitters.remove(clientId));
-        emitter.onTimeout(() -> sseEmitters.remove(clientId));
+        emitter.onCompletion(() -> sseEmittersRaw.remove(clientId));
+        emitter.onTimeout(() -> sseEmittersRaw.remove(clientId));
 
         return emitter;
     }
@@ -55,10 +59,10 @@ public class KafkaSecurityAuditLogController {
 
        SseEmitter emitter = new SseEmitter(0L);
 
-       sseEmittersLoginAccess.put(clientId, emitter);
+       sseEmittersAuthorized.put(clientId, emitter);
 
-       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onCompletion(() -> sseEmittersAuthorized.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersAuthorized.remove(clientId));
 
        return emitter;
     }
@@ -67,28 +71,31 @@ public class KafkaSecurityAuditLogController {
 //    // topic명: "unauthorized-access"에서 consume
     @GetMapping(value = "/unauth", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getUnauthorizedAccess() {
-       String clientId = java.util.UUID.randomUUID().toString();
+       String clientId =  java.util.UUID.randomUUID().toString();
 
        SseEmitter emitter = new SseEmitter(0L);
 
-       sseEmittersLoginAccess.put(clientId, emitter);
+       sseEmittersUnauthorized.put(clientId, emitter);
 
-       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onCompletion(() -> sseEmittersUnauthorized.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersUnauthorized.remove(clientId));
 
        return emitter;
     }
 
+    // 3. api/kafka/auth_failed
+    // -> 없는 계정 로그인 시도
+    // topic명: "access-failed"에서 consume
     @GetMapping(value = "/auth_failed", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter getAuthFailed() {
        String clientId = java.util.UUID.randomUUID().toString();
 
        SseEmitter emitter = new SseEmitter(0L);
 
-       sseEmittersLoginAccess.put(clientId, emitter);
+       sseEmittersAuthFailed.put(clientId, emitter);
 
-       emitter.onCompletion(() -> sseEmittersLoginAccess.remove(clientId));
-       emitter.onTimeout(() -> sseEmittersLoginAccess.remove(clientId));
+       emitter.onCompletion(() -> sseEmittersAuthFailed.remove(clientId));
+       emitter.onTimeout(() -> sseEmittersAuthFailed.remove(clientId));
 
        return emitter;
     }

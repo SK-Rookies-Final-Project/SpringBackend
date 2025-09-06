@@ -21,16 +21,17 @@ public class AuthorizedAccessConsumer {
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void onAuthorized(String message) {
-//        System.out.println("authorized-access: "+ message);
+        System.out.println("authorized-access: "+ message);
 
-        KafkaSecurityAuditLogController.sseEmittersLoginAccess.forEach((id, emitter) -> {
+        KafkaSecurityAuditLogController.sseEmittersAuthorized.forEach((id, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
                         .name("authorized-access")                 // 이벤트 이름
                         .data(message, MediaType.APPLICATION_JSON) // 메시지 그대로 전달
                 );
             } catch (IOException e) {
-                System.err.println();
+                System.err.println("SSE 전송 중 오류 발생: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }

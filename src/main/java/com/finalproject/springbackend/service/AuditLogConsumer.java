@@ -46,13 +46,14 @@ public class AuditLogConsumer {
 //        System.out.println("Consumed message: " + message);
 
         // 연결되어 있는 모든 클라이언트에게 메세지 전송
-        KafkaSecurityAuditLogController.sseEmitters.forEach((id, emitter) -> {
+        KafkaSecurityAuditLogController.sseEmittersRaw.forEach((id, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
                         .name("log-event")//로그 이벤트 명("log-event")이 찍힘
                         .data(message, MediaType.APPLICATION_JSON)); // Kafka에서 받은 메시지를 그대로 전달
             } catch (IOException e) {
-                System.err.println("Error sending message to client: " + id);
+                System.err.println("SSE 전송 중 오류 발생: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }

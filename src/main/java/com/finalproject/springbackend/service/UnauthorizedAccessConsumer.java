@@ -20,14 +20,15 @@ public class UnauthorizedAccessConsumer {
     public void onAuthorized(String message) {
         System.out.println("unauthorized-access: "+ message);
 
-        KafkaSecurityAuditLogController.sseEmittersLoginAccess.forEach((id, emitter) -> {
+        KafkaSecurityAuditLogController.sseEmittersUnauthorized.forEach((id, emitter) -> {
             try {
                 emitter.send(SseEmitter.event()
                         .name("unauthorized-access")                 // 이벤트 이름
                         .data(message, MediaType.APPLICATION_JSON) // 메시지 그대로 전달
                 );
             } catch (IOException e) {
-                System.err.println();
+                System.err.println("SSE 전송 중 오류 발생: " + e.getMessage());
+                e.printStackTrace();
             }
         });
     }
