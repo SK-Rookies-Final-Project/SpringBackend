@@ -44,4 +44,31 @@ public class KafkaSecurityAuditLogController {
     public SseEmitter getAuthFailed() {
         return sseService.createAuthFailedStream();
     }
+    
+    //우기님이 추가해주시면 uri 변경 및 메서드명 변경하기
+    @GetMapping(value = "/one", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getOne(){
+        return sseService.createOneStream();
+    }
+    @GetMapping(value = "/two", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getTwo(){
+        return sseService.createTwoStream();
+    }
+    @GetMapping(value = "/three", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getThree(){
+        return sseService.createThreeStream();
+    }
+    @GetMapping(value = "/four", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getFour(){
+        return sseService.createFourStream();
+    }
+    @GetMapping(value = "/five", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getFive(){
+        return sseService.createFiveStream();
+    }
+    @GetMapping(value = "/six", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter getSix(){
+        return sseService.createSixStream();
+    }
+
 }

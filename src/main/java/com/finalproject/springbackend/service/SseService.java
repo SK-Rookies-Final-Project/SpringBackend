@@ -14,7 +14,16 @@ public class SseService {
     private final Map<String, SseEmitter> authorizedEmitters = new ConcurrentHashMap<>();
     private final Map<String, SseEmitter> unauthorizedEmitters = new ConcurrentHashMap<>();
     private final Map<String, SseEmitter> authFailedEmitters = new ConcurrentHashMap<>();
-    
+
+    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
+    private final Map<String, SseEmitter> oneEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> twoEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> threeEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> fourEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> fiveEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> sixEmitters = new ConcurrentHashMap<>();
+
+
     // Raw 로그 스트림 생성
     public SseEmitter createRawLogStream() {
         return createSseConnection(rawLogEmitters);
@@ -34,6 +43,14 @@ public class SseService {
     public SseEmitter createAuthFailedStream() {
         return createSseConnection(authFailedEmitters);
     }
+
+    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
+    public SseEmitter createOneStream() { return createSseConnection(oneEmitters); }
+    public SseEmitter createTwoStream() { return createSseConnection(twoEmitters); }
+    public SseEmitter createThreeStream() { return createSseConnection(threeEmitters); }
+    public SseEmitter createFourStream() { return createSseConnection(fourEmitters); }
+    public SseEmitter createFiveStream() { return createSseConnection(fiveEmitters); }
+    public SseEmitter createSixStream() { return createSseConnection(sixEmitters); }
     
     // 공통 SSE 연결 생성 로직
     private SseEmitter createSseConnection(Map<String, SseEmitter> emitterMap) {
@@ -70,4 +87,13 @@ public class SseService {
     public Map<String, SseEmitter> getAuthFailedEmitters() {
         return authFailedEmitters;
     }
+
+    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
+    public Map<String, SseEmitter> getOneEmitters() { return oneEmitters; }
+    public Map<String, SseEmitter> getTwoEmitters() { return twoEmitters; }
+    public Map<String, SseEmitter> getThreeEmitters() { return threeEmitters; }
+    public Map<String, SseEmitter> getFourEmitters() { return fourEmitters; }
+    public Map<String, SseEmitter> getFiveEmitters() { return fiveEmitters; }
+    public Map<String, SseEmitter> getSixEmitters() { return sixEmitters; }
+
 }
