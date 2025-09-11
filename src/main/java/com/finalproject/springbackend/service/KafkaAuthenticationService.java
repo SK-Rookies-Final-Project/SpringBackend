@@ -12,9 +12,16 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Properties;
 
+import com.finalproject.springbackend.kafka.Region;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.AdminClientConfig;
+
 @Slf4j
 @Service
 public class KafkaAuthenticationService {
+
+    @Value("${SEOUL_KAFKA_BOOTSTRAP_SERVERS:}")
+    private String seoulBootstrapServers;
 
     @Value("${OHIO_KAFKA_BOOTSTRAP_SERVERS}")
     private String ohioBootstrapServers;
@@ -153,5 +160,36 @@ public class KafkaAuthenticationService {
         log.debug("생성된 JAAS 설정: {}", jaasConfig.replace(password, "***"));
 
         return props;
+    }
+
+    /**
+     * 실제 사용자 계정으로 AdminClient를 생성합니다.
+     * @param region Kafka 클러스터 지역 (SEOUL / OHIO)
+     * @param username SCRAM 사용자명
+     * @param password SCRAM 비밀번호
+     * @param bootstrapServers 부트스트랩 서버 주소
+     * @return AdminClient
+     */
+    public AdminClient creatAuthenticatedAdminClient(Region region, String username, String password, String bootstrapServers) {
+
+        // Region에 따라 bootstrap 고르기 (기본은 Ohio -> 기존 코드와 호환)
+        String bootstrap =
+                (region == Region.SEOUL && seoulBootstrapServers != null && !seoulBootstrapServers.isBlank())
+                        ? seoulBootstrapServers
+                        : ohioBootstrapServers;
+
+        Properties props = new Properties();
+        props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put("security.protocol", "SASL_PLAINTEXT");
+        props.put("sasl.mechanism", "SCRAM-SHA-512");
+
+        String jaasConfig = String.format(
+            "org.apache.kafka.common.security.scram.ScramLoginModule required " +
+            "username=\"%s\" password=\"%s\";", username, password
+        );
+        props.put("sasl.jaas.config", jaasConfig);
+
+        log.debug("AdminClient JAAS 설정: {}", jaasConfig.replace(password, "***"));
+        return AdminClient.create(props);
     }
 }
