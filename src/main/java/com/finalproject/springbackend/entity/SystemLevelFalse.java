@@ -3,19 +3,15 @@ package com.finalproject.springbackend.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
-
 @Entity
-@Table(name = "test_table1")
+@Table(name="\"system-level-false\"")
 @Getter @Setter @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestTable {
-
+public class SystemLevelFalse {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    private Date date;
+    @Column(name="payload", columnDefinition = "text")
+    private String payload;
 }
