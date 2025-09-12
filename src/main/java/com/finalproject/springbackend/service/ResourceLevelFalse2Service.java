@@ -145,7 +145,7 @@ public class ResourceLevelFalse2Service {
             String principal, String operation, String clientIp
     ) {
         if(end==null){ end=OffsetDateTime.now(); }
-        return repo.findByPRC(start, end, principal, operation, clientIp);
+        return repo.findByPOC(start, end, principal, operation, clientIp);
     }
 
     //시간 + resource_name + operation + client_ip
