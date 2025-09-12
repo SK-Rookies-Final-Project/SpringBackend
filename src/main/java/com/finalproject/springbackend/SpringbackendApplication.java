@@ -5,8 +5,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-//@SpringBootApplication
+//@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}) // DB 연결이 없을 때
+@SpringBootApplication //DB 연결이 필요할 때
 public class SpringbackendApplication {
 
 	public static void main(String[] args) {
