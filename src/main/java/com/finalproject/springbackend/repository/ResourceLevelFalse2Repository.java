@@ -163,6 +163,25 @@ public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLev
             @Param("clientIp") String clientIp
     );
 
+    //시간 + principal + operation += client_ip
+    @Query("""
+        SELECT r FROM ResourceLevelFalse2 r
+        WHERE (r.eventTimeUTC >= :start) AND (r.eventTimeUTC <= :end)
+          AND (r.principal = :principal)
+          AND (r.operation = :operation)
+          AND (r.clientIp = :clientIp)
+        ORDER BY r.eventTimeUTC ASC
+    """)
+    List<ResourceLevelFalse2> findByPOC(
+            @Param("start") OffsetDateTime start,
+            @Param("end") OffsetDateTime end,
+            @Param("principal") String principal,
+            @Param("operation") String operation,
+            @Param("clientIp") String clientIp
+    );
+
+
+
     //시간 + resourceName, operation, clientIp
     @Query("""
         SELECT r FROM ResourceLevelFalse2 r
