@@ -81,6 +81,7 @@ public class AuthController {
     /**
      * Kafka SCRAM 인증 테스트용 엔드포인트 (개발/테스트 목적)
      * 실제 운영 환경에서는 제거해야 합니다.
+     * 집가고싶어요
      */
     @PostMapping("/test-kafka-auth")
     public ResponseEntity<?> testKafkaAuth(@Valid @RequestBody LoginRequestDTO loginRequest) {
