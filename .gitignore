@@ -6,7 +6,8 @@ build/
 !**/src/test/**/build/
 
 .env
-**/src/main/java/com/finalproject/springbackend/dto/response.json
+src/main/java/com/finalproject/springbackend/tmp/*
+
 
 ### STS ###
 .apt_generated
