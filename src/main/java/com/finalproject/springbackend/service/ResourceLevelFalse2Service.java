@@ -28,7 +28,7 @@ public class ResourceLevelFalse2Service {
             end = OffsetDateTime.now();
         }
 
-        return repo.findByEventTimeUTCRange(start, end);
+        return repo.findByEventTimeUTCBetweenOrderByEventTimeUTCAsc(start, end);
     }
 
 }
