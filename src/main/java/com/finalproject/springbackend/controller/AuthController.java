@@ -26,9 +26,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         log.info("로그인 시도: {}", loginRequest.getUsername());
-
+        
         LoginResponseDTO response = authService.authenticate(loginRequest);
-
+        
         if (response.isSuccess()) {
             log.info("로그인 성공: {}", loginRequest.getUsername());
             return ResponseEntity.ok(response);
@@ -43,13 +43,13 @@ public class AuthController {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             boolean isValid = authService.validateToken(token);
-
+            
             if (isValid) {
                 String username = authService.getUsernameFromToken(token);
                 return ResponseEntity.ok().body("{\"valid\": true, \"username\": \"" + username + "\"}");
             }
         }
-
+        
         return ResponseEntity.badRequest().body("{\"valid\": false}");
     }
 
@@ -57,7 +57,7 @@ public class AuthController {
     public ResponseEntity<?> getUserPermissions(Authentication authentication) {
         String username = authentication.getName();
         List<String> permissions = permissionService.getPermissionCodes(username);
-
+        
         return ResponseEntity.ok(Map.of(
             "username", username,
             "permissions", permissions
@@ -69,7 +69,7 @@ public class AuthController {
         String username = authentication.getName();
         var userInfo = authService.getUserInfo(username);
         List<String> permissions = permissionService.getPermissionCodes(username);
-
+        
         return ResponseEntity.ok(Map.of(
             "username", username,
             "region", userInfo.getRegion(),
@@ -85,13 +85,13 @@ public class AuthController {
     @PostMapping("/test-kafka-auth")
     public ResponseEntity<?> testKafkaAuth(@Valid @RequestBody LoginRequestDTO loginRequest) {
         log.info("Kafka 인증 테스트: {}", loginRequest.getUsername());
-
+        
         try {
             boolean authResult = authService.testKafkaAuthentication(
                 loginRequest.getUsername(), 
                 loginRequest.getPassword()
             );
-
+            
             return ResponseEntity.ok(Map.of(
                 "username", loginRequest.getUsername(),
                 "kafkaAuthSuccess", authResult,
