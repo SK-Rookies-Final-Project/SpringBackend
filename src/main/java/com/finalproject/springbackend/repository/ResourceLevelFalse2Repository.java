@@ -13,6 +13,12 @@ import java.util.List;
 @Repository
 public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLevelFalse2, String> {
 
+    /** 각 레코드 별로 레코드 반환 */
+    List<ResourceLevelFalse2> findByPrincipal(String principal);
+    List<ResourceLevelFalse2> findByResourceName(String resourceName);
+    List<ResourceLevelFalse2> findByOperation(String operation);
+    List<ResourceLevelFalse2> findByClientIp(String clientIp);
+
     /** 시간 기준으로만 찾기*/
     //시간 기준으로만 찾기
     List<ResourceLevelFalse2> findByEventTimeUTCBetweenOrderByEventTimeUTCAsc(

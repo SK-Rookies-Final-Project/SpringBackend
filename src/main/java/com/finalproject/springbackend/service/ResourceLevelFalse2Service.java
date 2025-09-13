@@ -1,5 +1,6 @@
 package com.finalproject.springbackend.service;
 
+import com.finalproject.springbackend.entity.ResourceLevelFalse;
 import com.finalproject.springbackend.entity.ResourceLevelFalse2;
 import com.finalproject.springbackend.repository.ResourceLevelFalse2Repository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,66 @@ public class ResourceLevelFalse2Service {
      * boolean str.isBlank() : str.length()==0 || str에 오직 모든 whitespace만 있으면 true
      * String str.strip() : 앞 뒤 whiteSpace 제거
      */
+
+    /** 전체 레코드 가져오기 */
+    @Transactional(readOnly = true)
+    public List<ResourceLevelFalse2> getAll(){
+        return repo.findAll();
+    }
+
+    /** 전체 레코드 갯수 */
+    @Transactional(readOnly = true)
+    public Long getCount(){
+        return repo.count();
+    }
+
+    /** 각각의 컬럼 별 리스트 및 갯수 조회 */
+    public List<ResourceLevelFalse2> getPrincipal(String principal){
+        List<ResourceLevelFalse2> principalList = repo.findByPrincipal(principal);
+        if (principalList == null){
+            throw new IllegalArgumentException(principal+" 유저는 비인가 접근 기록이 존재하지 않습니다. ");
+        }
+        return principalList;
+    }
+    public int getPrincipalCount(String principal){
+        List<ResourceLevelFalse2> list = repo.findByPrincipal(principal);
+        int count = list.size();
+        return count;
+    }
+
+    public List<ResourceLevelFalse2> getResourceName(String resourceName){
+        List<ResourceLevelFalse2> resourceNameList = repo.findByResourceName(resourceName);
+        if(resourceNameList == null) {
+            throw new IllegalArgumentException(resourceName + " 리소스로 비인가 접근 기록이 존재하지 않습니다. ");
+        }
+        return resourceNameList;
+    }
+    public int getResourceNameCount(String resourceName){
+        return repo.findByResourceName(resourceName).size();
+    }
+
+    public List<ResourceLevelFalse2> getOperation(String operation){
+        List<ResourceLevelFalse2> operationList = repo.findByOperation(operation);
+        if(operationList == null){
+            throw new IllegalArgumentException(operation + " 권한으로 비인가 접근 기록이 존재하지 않습니다");
+        }
+        return operationList;
+    }
+    public int getOperationCount(String operation) {
+        return repo.findByOperation(operation).size();
+    }
+
+    public List<ResourceLevelFalse2> getClientIp(String clientIp){
+        List<ResourceLevelFalse2> clientIpList = repo.findByClientIp(clientIp);
+        if(clientIpList == null){
+            throw new IllegalArgumentException(clientIp + "에서 비인가 접근 기록이 존재하지 않습니다. ");
+        }
+        return clientIpList;
+    }
+    public int getClientIpCount(String clientIp){
+        return repo.findByClientIp(clientIp).size();
+    }
+
 
     /**
      * 파라미터 보정 메서드
@@ -126,6 +187,13 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByEventTimeUTCBetweenOrderByEventTimeUTCAsc(start, end);
     }
+    //시간 기준 레코드 갯수
+    public int getTimesOnlyCount(
+            OffsetDateTime start,
+            OffsetDateTime end
+    ){
+        return getTimesOnly(start, end).size();
+    }
     /** 시간 + 1개의 컬럼으로 레코드 조회*/
     //시간 + principal 컬럼으로 레코드 찾기
     public List<ResourceLevelFalse2> getTimeAndPrincipal(
@@ -139,6 +207,13 @@ public class ResourceLevelFalse2Service {
         principal = correctionOfPrincipal(principal);
 
         return repo.findByEventTimeUTCBetweenAndPrincipalOrderByEventTimeUTCAsc(start, end, principal);
+    }
+    public int getTimeAndPrincipalCount(
+            OffsetDateTime start,
+            OffsetDateTime end,
+            String principal
+    ){
+        return getTimeAndPrincipal(start, end, principal).size();
     }
 
     //시간 + resource_name 컬럼으로 레코드 찾기
@@ -156,6 +231,14 @@ public class ResourceLevelFalse2Service {
                 start, end, resourceName
         );
     }
+    //갯수
+    public int getTimeAndResourceNameCount(
+            OffsetDateTime start,
+            OffsetDateTime end,
+            String resourceName
+    ){
+        return getTimeAndResourceName(start, end, resourceName).size();
+    }
 
     //시간 + operation
     public List<ResourceLevelFalse2> getTimeAndOperation(
@@ -168,6 +251,11 @@ public class ResourceLevelFalse2Service {
         operation = correctionOfOperation(operation);
 
         return repo.findByEventTimeUTCBetweenAndOperationOrderByEventTimeUTCAsc(start, end, operation);
+    }
+    public int getTimeAndOperationCount(
+            OffsetDateTime start, OffsetDateTime end, String operation
+    ){
+        return getTimeAndOperation(start, end, operation).size();
     }
 
     //시간 + client_ip
@@ -182,6 +270,11 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByEventTimeUTCBetweenAndClientIpOrderByEventTimeUTCAsc(start, end, clientIp);
 
+    }
+    public int getTimeAndClientIpCount(
+            OffsetDateTime start, OffsetDateTime end, String clientIp
+    ){
+        return getTimeAndClientIp(start, end, clientIp).size();
     }
 
     /**시간 + 2가지 컬럼으로 찾기*/
@@ -199,6 +292,13 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByPR(start, end, principal, resourceName);
     }
+    public int getTimeAndPRCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String resourceName
+    ){
+        return getTimeAndPR(start, end, principal, resourceName).size();
+    }
+
     //시간 + principal, operation
     public List<ResourceLevelFalse2> getTimeAndPO(
             OffsetDateTime start, OffsetDateTime end,
@@ -212,6 +312,12 @@ public class ResourceLevelFalse2Service {
         operation = correctionOfOperation(operation);
 
         return repo.findByPO(start, end, principal, operation);
+    }
+    public int getTimeAndPOCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String operation
+    ){
+        return getTimeAndPO(start, end, principal, operation).size();
     }
 
     //시간 + principal, clientIp
@@ -227,6 +333,12 @@ public class ResourceLevelFalse2Service {
         clientIp = correctionOfClientIp(clientIp);
 
         return repo.findByPC(start, end, principal, clientIp);
+    }
+    public int getTimeAndPCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String clientIp
+    ){
+        return getTimeAndPC(start, end, principal, clientIp).size();
     }
     
     
@@ -244,6 +356,12 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByRO(start, end, resourceName, operation);
     }
+    public int getTimeAndROCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String resourceName, String operation
+    ){
+        return getTimeAndRO(start, end, resourceName, operation).size();
+    }
     
     //시간 + resource_name + client_ip 으로 조회
     public List<ResourceLevelFalse2> getTimeAndRC (
@@ -259,7 +377,13 @@ public class ResourceLevelFalse2Service {
         
         return repo.findByRC(start, end, resourceName, clientIp);
     }
-    
+    public int getTimeAndRCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String resourceName, String clientIp
+    ){
+        return getTimeAndRC(start, end, resourceName, clientIp).size();
+    }
+
     //시간 + operation, client_ip
     public List<ResourceLevelFalse2> getTimeAndOC (
             OffsetDateTime start, OffsetDateTime end,
@@ -273,6 +397,12 @@ public class ResourceLevelFalse2Service {
         clientIp = correctionOfClientIp(clientIp);
 
         return repo.findByOC(start, end, operation, clientIp);
+    }
+    public int getTimeAndOCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String operation, String clientIp
+    ){
+        return getTimeAndOC(start, end, operation, clientIp).size();
     }
 
     /**시간 + 3가지 컬럼으로 조회*/
@@ -291,6 +421,12 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByPRO(start, end, principal, resourceName, operation);
     }
+    public int getTimeAndPROCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String resourceName, String operation
+    ){
+        return getTimeAndPRO(start, end, principal, resourceName, operation).size();
+    }
 
     //시간 + principal + resource_name + client_ip
     public List<ResourceLevelFalse2> getTimeAndPRC(
@@ -306,6 +442,12 @@ public class ResourceLevelFalse2Service {
         clientIp = correctionOfClientIp(clientIp);
 
         return repo.findByPRC(start, end, principal, resourceName, clientIp);
+    }
+    public int getTimeAndPRCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String resourceName, String clientIp
+    ){
+        return getTimeAndPRC(start, end, principal, resourceName, clientIp).size();
     }
 
     //시간 + principal + operation + client_ip
@@ -323,6 +465,12 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByPOC(start, end, principal, operation, clientIp);
     }
+    public int getTimeAndPOCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String operation, String clientIp
+    ){
+        return getTimeAndPOC(start, end, principal, operation, clientIp).size();
+    }
 
     //시간 + resource_name + operation + client_ip
     public List<ResourceLevelFalse2> getTimeAndROC(
@@ -338,6 +486,12 @@ public class ResourceLevelFalse2Service {
         clientIp = correctionOfClientIp(clientIp);
 
         return repo.findByROC(start, end, resourceName, operation, clientIp);
+    }
+    public int getTimeAndROCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String resourceName, String operation, String clientIp
+    ){
+        return getTimeAndROC(start, end, resourceName, operation, clientIp).size();
     }
 
     /** 시간 + 4가지 컬럼으로 찾기 */
@@ -357,6 +511,14 @@ public class ResourceLevelFalse2Service {
 
         return repo.findByPROC(start, end, principal, resourceName, operation, clientIp);
     }
+    public int getTimeAndPROCCount(
+            OffsetDateTime start, OffsetDateTime end,
+            String principal, String resourceName, String operation, String clientIp
+    ){
+        return getTimeAndPROC(start, end, principal, resourceName, operation, clientIp).size();
+    }
+
+
     //principal
     //resource_name
     //operation
