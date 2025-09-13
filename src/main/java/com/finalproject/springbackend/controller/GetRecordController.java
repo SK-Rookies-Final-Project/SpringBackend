@@ -70,10 +70,10 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end"})
+    @GetMapping(value = "/resource_level_false", params = {"start"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimes(
             @RequestParam OffsetDateTime start,
-            @RequestParam OffsetDateTime end
+            @RequestParam(required = false) OffsetDateTime end
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service
                 .getTimeStampWithUnAuthAccess(start, end);
@@ -89,9 +89,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "principal"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "principal"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPrincipal(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPrincipal(
@@ -108,9 +108,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "resourceName"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "resourceName"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndResourceName(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String resourceName
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndResourceName(
@@ -127,9 +127,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "operation"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "operation"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndOperation(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String operation
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndOperation(
@@ -146,9 +146,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "clientIp"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndClientIp(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndClientIp(
@@ -166,9 +166,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "principal", "resourceName"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "principal", "resourceName"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPR(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal, @RequestParam String resourceName
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPR(
@@ -186,9 +186,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "principal", "operation"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "principal", "operation"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPO(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal, @RequestParam String operation
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPO(
@@ -206,9 +206,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "principal", "clientIp"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "principal", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal, @RequestParam String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPC(
@@ -226,9 +226,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "resourceName", "operation"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "resourceName", "operation"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndRO(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String resourceName, @RequestParam String operation
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndRO(
@@ -246,9 +246,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "resourceName", "clientIp"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "resourceName", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndRC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String resourceName, @RequestParam String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndRC(
@@ -266,9 +266,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "operation", "clientIp"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "operation", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndOC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String operation, @RequestParam String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndOC(
@@ -287,9 +287,9 @@ public class GetRecordController {
      *                      200 OK - 결과 리스트(없으면 빈 리스트),
      *                      400 Bad Request - 파라미터 검증 실패
      */
-    @GetMapping(value = "/resource_level_false", params = {"start", "end", "principal", "resourceName", "operation"})
+    @GetMapping(value = "/resource_level_false", params = {"start", "principal", "resourceName", "operation"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPRO(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String resourceName,
             @RequestParam String operation
@@ -310,9 +310,9 @@ public class GetRecordController {
      *                      400 Bad Request - 파라미터 검증 실패
      */
     @GetMapping(value = "/resource_level_false",
-            params = {"start", "end", "principal", "resourceName", "clientIp"})
+            params = {"start", "principal", "resourceName", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPRC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String resourceName,
             @RequestParam String clientIp
@@ -333,9 +333,9 @@ public class GetRecordController {
      *                      400 Bad Request - 파라미터 검증 실패
      */
     @GetMapping(value = "/resource_level_false",
-                params = {"start", "end", "principal", "operation", "clientIp"})
+                params = {"start", "principal", "operation", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPOC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String operation,
             @RequestParam String clientIp
@@ -356,9 +356,9 @@ public class GetRecordController {
      *                      400 Bad Request - 파라미터 검증 실패
      */
     @GetMapping(value = "/resource_level_false",
-                params = {"start", "end", "resourceName", "operation", "clientIp"})
+                params = {"start", "resourceName", "operation", "clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndROC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String resourceName,
             @RequestParam String operation,
             @RequestParam String clientIp
@@ -380,10 +380,9 @@ public class GetRecordController {
      *                      400 Bad Request - 파라미터 검증 실패
      */
     @GetMapping(value = "/resource_level_false",
-                    params = {"start", "end",
-                            "principal", "resourceName","operation","clientIp"})
+                    params = {"start", "principal", "resourceName","operation","clientIp"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPROC(
-            @RequestParam OffsetDateTime start, @RequestParam OffsetDateTime end,
+            @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String resourceName,
             @RequestParam String operation,
