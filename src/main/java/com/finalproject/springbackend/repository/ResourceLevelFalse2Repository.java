@@ -19,6 +19,13 @@ public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLev
     List<ResourceLevelFalse2> findByOperation(String operation);
     List<ResourceLevelFalse2> findByClientIp(String clientIp);
 
+    /** 각 레코드(1개) 별 크기 반환 */
+    long countByPrincipal(String principal);
+    long countByResourceName(String resourceName);
+    long countByOperation(String operation);
+    long countByClientIp(String clientIp);
+
+
     /** 시간 기준으로만 찾기*/
     //시간 기준으로만 찾기
     List<ResourceLevelFalse2> findByEventTimeUTCBetweenOrderByEventTimeUTCAsc(

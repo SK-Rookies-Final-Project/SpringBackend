@@ -1,7 +1,5 @@
 package com.finalproject.springbackend.controller;
 
-
-import com.finalproject.springbackend.entity.ResourceLevelFalse;
 import com.finalproject.springbackend.entity.ResourceLevelFalse2;
 import com.finalproject.springbackend.service.ResourceLevelFalse2Service;
 import lombok.RequiredArgsConstructor;
@@ -50,23 +48,23 @@ public class GetResourceLevelFalse2Controller {
     }
     //특정 principal 원소가 일치하는 레코드 갯수 반환
     @GetMapping(value = "/count", params = {"principal"})
-    public ResponseEntity<Integer> getPrincipalListCount(
+    public ResponseEntity<Long> getPrincipalListCount(
             @RequestParam String principal) {
-        Integer count = rlf2Service.getPrincipalCount(principal);
+        Long count = rlf2Service.getPrincipalCount(principal);
         return ResponseEntity.ok(count);
     }
 
     //resource_name
     @GetMapping(params={"resource_name"})
     public ResponseEntity<List<ResourceLevelFalse2>> getResourceNameList(
-            @RequestParam String resourceName
+            @RequestParam("resource_name") String resourceName
     ){
         return ResponseEntity.ok(rlf2Service.getResourceName(resourceName));
     }
     @GetMapping(value = "/count", params = {"resource_name"})
-    public ResponseEntity<Integer> getResourceNameListCount(
-            @RequestParam String resourceName) {
-        Integer count = rlf2Service.getResourceNameCount(resourceName);
+    public ResponseEntity<Long> getResourceNameListCount(
+            @RequestParam("resource_name") String resourceName) {
+        Long count = rlf2Service.getResourceNameCount(resourceName);
         return ResponseEntity.ok(count);
     }
     //operation
@@ -77,22 +75,22 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf2Service.getOperation(operation));
     }
     @GetMapping(value = "/count", params = {"operation"})
-    public ResponseEntity<Integer> getOperationListCount(
+    public ResponseEntity<Long> getOperationListCount(
             @RequestParam String operation) {
-        Integer count = rlf2Service.getOperationCount(operation);
+        Long count = rlf2Service.getOperationCount(operation);
         return ResponseEntity.ok(count);
     }
     //client_ip
     @GetMapping(params={"client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getClientIpList(
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ){
         return ResponseEntity.ok(rlf2Service.getClientIp(clientIp));
     }
     @GetMapping(value = "/count", params = {"client_ip"})
-    public ResponseEntity<Integer> getClientIpListCount(
-            @RequestParam String clientIp) {
-        Integer count = rlf2Service.getClientIpCount(clientIp);
+    public ResponseEntity<Long> getClientIpListCount(
+            @RequestParam("client_ip") String clientIp) {
+        Long count = rlf2Service.getClientIpCount(clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -117,11 +115,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start"})
-    public ResponseEntity<Integer> getTimesOnlyCount(
+    public ResponseEntity<Long> getTimesOnlyCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end
     ) {
-        Integer count = rlf2Service.getTimesOnlyCount(start, end);
+        Long count = (long)rlf2Service.getTimesOnlyCount(start, end);
         return ResponseEntity.ok(count);
     }
 
@@ -144,12 +142,12 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal"})
-    public ResponseEntity<Integer> getTimeAndPrincipalCount(
+    public ResponseEntity<Long> getTimeAndPrincipalCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal
     ) {
-        Integer count = rlf2Service.getTimeAndPrincipalCount(start, end,principal);
+        Long count = (long) rlf2Service.getTimeAndPrincipalCount(start, end,principal);
         return ResponseEntity.ok(count);
     }
 
@@ -165,7 +163,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "resource_name"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndResourceName(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName
+            @RequestParam("resource_name") String resourceName
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndResourceName(
                 start, end, resourceName
@@ -173,12 +171,12 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "resource_name"})
-    public ResponseEntity<Integer> getTimeAndResourceNameCount(
+    public ResponseEntity<Long> getTimeAndResourceNameCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName
+            @RequestParam("resource_name") String resourceName
     ) {
-        Integer count = rlf2Service.getTimeAndResourceNameCount(start, end, resourceName);
+        Long count = (long)rlf2Service.getTimeAndResourceNameCount(start, end, resourceName);
         return ResponseEntity.ok(count);
     }
 
@@ -201,12 +199,12 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "operation"})
-    public ResponseEntity<Integer> getTimeAndOperationCount(
+    public ResponseEntity<Long> getTimeAndOperationCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String operation
     ) {
-        Integer count = rlf2Service.getTimeAndOperationCount(start, end, operation);
+        Long count = (long) rlf2Service.getTimeAndOperationCount(start, end, operation);
         return ResponseEntity.ok(count);
     }
     /**
@@ -220,7 +218,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndClientIp(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndClientIp(
                 start, end, clientIp
@@ -228,12 +226,12 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndgetTimeAndClientIpCount(
+    public ResponseEntity<Long> getTimeAndClientIpCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndClientIpCount(start, end, clientIp);
+        Long count = (long)rlf2Service.getTimeAndClientIpCount(start, end, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -249,7 +247,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "principal", "resource_name"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPR(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String principal, @RequestParam String resourceName
+            @RequestParam String principal, @RequestParam("resource_name") String resourceName
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPR(
                 start, end, principal, resourceName
@@ -257,13 +255,13 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal","resource_name"})
-    public ResponseEntity<Integer> getTimeAndPRCount(
+    public ResponseEntity<Long> getTimeAndPRCount(
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String clientIp
+            @RequestParam("resource_name") String resourceName
     ) {
-        Integer count = rlf2Service.getTimeAndPRCount(start, end, principal, clientIp);
+        Long count = (long)rlf2Service.getTimeAndPRCount(start, end, principal, resourceName);
         return ResponseEntity.ok(count);
     }
 
@@ -287,11 +285,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal","operation"})
-    public ResponseEntity<Integer> getTimeAndPOCount(
+    public ResponseEntity<Long> getTimeAndPOCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal, @RequestParam String operation
     ) {
-        Integer count = rlf2Service.getTimeAndPOCount(start, end, principal, operation);
+        Long count = (long)rlf2Service.getTimeAndPOCount(start, end, principal, operation);
         return ResponseEntity.ok(count);
     }
 
@@ -308,7 +306,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "principal", "client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String principal, @RequestParam String clientIp
+            @RequestParam String principal, @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPC(
                 start, end, principal, clientIp
@@ -316,11 +314,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal","client_ip"})
-    public ResponseEntity<Integer> getTimeAndPCCount(
+    public ResponseEntity<Long> getTimeAndPCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String principal, @RequestParam String clientIp
+            @RequestParam String principal, @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndPCCount(start, end, principal, clientIp);
+        Long count = (long)rlf2Service.getTimeAndPCCount(start, end, principal, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -336,7 +334,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "resource_name", "operation"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndRO(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName, @RequestParam String operation
+            @RequestParam("resource_name") String resourceName, @RequestParam String operation
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndRO(
                 start, end, resourceName, operation
@@ -344,11 +342,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "resource_name", "operation"})
-    public ResponseEntity<Integer> getTimeAndROCount(
+    public ResponseEntity<Long> getTimeAndROCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName, @RequestParam String operation
+            @RequestParam("resource_name") String resourceName, @RequestParam String operation
     ) {
-        Integer count = rlf2Service.getTimeAndROCount(start, end, resourceName, operation);
+        Long count = (long)rlf2Service.getTimeAndROCount(start, end, resourceName, operation);
         return ResponseEntity.ok(count);
     }
 
@@ -364,7 +362,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "resource_name", "client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndRC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName, @RequestParam String clientIp
+            @RequestParam("resource_name") String resourceName, @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndRC(
                 start, end, resourceName, clientIp
@@ -372,11 +370,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "resource_name", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndRCCount(
+    public ResponseEntity<Long> getTimeAndRCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName, @RequestParam String clientIp
+            @RequestParam("resource_name") String resourceName, @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndRCCount(start, end, resourceName, clientIp);
+        Long count = (long)rlf2Service.getTimeAndRCCount(start, end, resourceName, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -392,7 +390,7 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "operation", "client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndOC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String operation, @RequestParam String clientIp
+            @RequestParam String operation, @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndOC(
                 start, end, operation, clientIp
@@ -400,11 +398,11 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "operation", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndOCCount(
+    public ResponseEntity<Long> getTimeAndOCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String operation, @RequestParam String clientIp
+            @RequestParam String operation, @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndOCCount(start, end, operation, clientIp);
+        Long count = (long)rlf2Service.getTimeAndOCCount(start, end, operation, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -423,7 +421,7 @@ public class GetResourceLevelFalse2Controller {
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPRO(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPRO(
@@ -431,13 +429,13 @@ public class GetResourceLevelFalse2Controller {
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal", "resource_name", "operation"})
-    public ResponseEntity<Integer> getTimeAndPROCount(
+    public ResponseEntity<Long> getTimeAndPROCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation
     ) {
-        Integer count = rlf2Service.getTimeAndPROCount(start, end, principal, resourceName, operation);
+        Long count = (long)rlf2Service.getTimeAndPROCount(start, end, principal, resourceName, operation);
         return ResponseEntity.ok(count);
     }
 
@@ -455,21 +453,21 @@ public class GetResourceLevelFalse2Controller {
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPRC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
-            @RequestParam String clientIp
+            @RequestParam("resource_name") String resourceName,
+            @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPRC(
                 start, end, principal, resourceName, clientIp);
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal", "resource_name", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndPRCCount(
+    public ResponseEntity<Long> getTimeAndPRCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
-            @RequestParam String clientIp
+            @RequestParam("resource_name") String resourceName,
+            @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndPRCCount(start, end, principal, resourceName, clientIp);
+        Long count = (long)rlf2Service.getTimeAndPRCCount(start, end, principal, resourceName, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -488,20 +486,20 @@ public class GetResourceLevelFalse2Controller {
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPOC(
                 start, end, principal, operation, clientIp);
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal", "operation", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndPOCCount(
+    public ResponseEntity<Long> getTimeAndPOCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndPOCCount(start, end, principal, operation, clientIp);
+        Long count = (long)rlf2Service.getTimeAndPOCCount(start, end, principal, operation, clientIp);
         return ResponseEntity.ok(count);
     }
 
@@ -518,22 +516,22 @@ public class GetResourceLevelFalse2Controller {
     @GetMapping(params = {"start", "resource_name", "operation", "client_ip"})
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndROC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndROC(
                 start, end, resourceName, operation, clientIp);
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "resource_name", "operation", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndROCCount(
+    public ResponseEntity<Long> getTimeAndROCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndROCCount(start, end, resourceName, operation, clientIp);
+        Long count = (long)rlf2Service.getTimeAndROCCount(start, end, resourceName, operation, clientIp);
         return ResponseEntity.ok(count);
     }
     /**
@@ -551,23 +549,23 @@ public class GetResourceLevelFalse2Controller {
     public ResponseEntity<List<ResourceLevelFalse2>> getTimeAndPROC(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ){
         List<ResourceLevelFalse2> rlf = rlf2Service.getTimeAndPROC(
                 start, end, principal, resourceName, operation, clientIp);
         return ResponseEntity.ok(rlf);
     }
     @GetMapping(value = "/count", params = {"start", "principal", "resource_name", "operation", "client_ip"})
-    public ResponseEntity<Integer> getTimeAndPROCCount(
+    public ResponseEntity<Long> getTimeAndPROCCount(
             @RequestParam OffsetDateTime start, @RequestParam(required = false) OffsetDateTime end,
             @RequestParam String principal,
-            @RequestParam String resourceName,
+            @RequestParam("resource_name") String resourceName,
             @RequestParam String operation,
-            @RequestParam String clientIp
+            @RequestParam("client_ip") String clientIp
     ) {
-        Integer count = rlf2Service.getTimeAndPROCCount(start, end, principal, resourceName, operation, clientIp);
+        Long count = (long)rlf2Service.getTimeAndPROCCount(start, end, principal, resourceName, operation, clientIp);
         return ResponseEntity.ok(count);
     }
 

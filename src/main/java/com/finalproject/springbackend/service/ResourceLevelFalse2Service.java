@@ -37,49 +37,56 @@ public class ResourceLevelFalse2Service {
 
     /** 각각의 컬럼 별 리스트 및 갯수 조회 */
     public List<ResourceLevelFalse2> getPrincipal(String principal){
+        principal = correctionOfPrincipal(principal);
         List<ResourceLevelFalse2> principalList = repo.findByPrincipal(principal);
-        if (principalList == null){
+        if (principalList.isEmpty()){
             throw new IllegalArgumentException(principal+" 유저는 비인가 접근 기록이 존재하지 않습니다. ");
         }
+
         return principalList;
     }
-    public int getPrincipalCount(String principal){
-        List<ResourceLevelFalse2> list = repo.findByPrincipal(principal);
-        int count = list.size();
-        return count;
+    public long getPrincipalCount(String principal){
+        principal = correctionOfPrincipal(principal);
+        return repo.countByPrincipal(principal);
     }
 
     public List<ResourceLevelFalse2> getResourceName(String resourceName){
+        resourceName = correctionOfResourceName(resourceName);
         List<ResourceLevelFalse2> resourceNameList = repo.findByResourceName(resourceName);
-        if(resourceNameList == null) {
+        if(resourceNameList.isEmpty()) {
             throw new IllegalArgumentException(resourceName + " 리소스로 비인가 접근 기록이 존재하지 않습니다. ");
         }
         return resourceNameList;
     }
-    public int getResourceNameCount(String resourceName){
-        return repo.findByResourceName(resourceName).size();
+    public long getResourceNameCount(String resourceName){
+        resourceName = correctionOfResourceName(resourceName);
+        return repo.countByResourceName(resourceName);
     }
 
     public List<ResourceLevelFalse2> getOperation(String operation){
+        operation = correctionOfOperation(operation);
         List<ResourceLevelFalse2> operationList = repo.findByOperation(operation);
-        if(operationList == null){
+        if(operationList.isEmpty()){
             throw new IllegalArgumentException(operation + " 권한으로 비인가 접근 기록이 존재하지 않습니다");
         }
         return operationList;
     }
-    public int getOperationCount(String operation) {
-        return repo.findByOperation(operation).size();
+    public long getOperationCount(String operation) {
+        operation = correctionOfOperation(operation);
+        return repo.countByOperation(operation);
     }
 
     public List<ResourceLevelFalse2> getClientIp(String clientIp){
+        clientIp = correctionOfClientIp(clientIp);
         List<ResourceLevelFalse2> clientIpList = repo.findByClientIp(clientIp);
-        if(clientIpList == null){
+        if(clientIpList.isEmpty()){
             throw new IllegalArgumentException(clientIp + "에서 비인가 접근 기록이 존재하지 않습니다. ");
         }
         return clientIpList;
     }
-    public int getClientIpCount(String clientIp){
-        return repo.findByClientIp(clientIp).size();
+    public long getClientIpCount(String clientIp){
+        clientIp = correctionOfClientIp(clientIp);
+        return repo.countByClientIp(clientIp);
     }
 
 
