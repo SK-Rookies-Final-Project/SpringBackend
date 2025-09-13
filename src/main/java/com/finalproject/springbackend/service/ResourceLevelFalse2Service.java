@@ -114,7 +114,7 @@ public class ResourceLevelFalse2Service {
 
     /** 시간으로만 찾기 */
     //시간 기준으로만 찾기
-    public List<ResourceLevelFalse2> getTimeStampWithUnAuthAccess (
+    public List<ResourceLevelFalse2> getTimesOnly (
             OffsetDateTime start,
             OffsetDateTime end
     ){

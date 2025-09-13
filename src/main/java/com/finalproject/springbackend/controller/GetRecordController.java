@@ -75,8 +75,7 @@ public class GetRecordController {
             @RequestParam OffsetDateTime start,
             @RequestParam(required = false) OffsetDateTime end
     ){
-        List<ResourceLevelFalse2> rlf = rlf2Service
-                .getTimeStampWithUnAuthAccess(start, end);
+        List<ResourceLevelFalse2> rlf = rlf2Service.getTimesOnly(start, end);
 
         return ResponseEntity.ok(rlf);
     }
