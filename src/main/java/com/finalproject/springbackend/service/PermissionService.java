@@ -1,36 +1,57 @@
 package com.finalproject.springbackend.service;
 
 import com.finalproject.springbackend.dto.Permission;
-import com.finalproject.springbackend.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
 import java.util.*;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PermissionService {
-
-    private final AuthService authService;
     
-    // 사용자별 권한 매핑
-    private final Map<String, Set<Permission>> userPermissions = new HashMap<>();
+    private static final Logger log = LoggerFactory.getLogger(PermissionService.class);
+
+    // 사용자별 권한 매핑 (실제 환경에서는 DB에서 조회)
+    private final Map<String, Permission> userPermissions = new HashMap<>();
 
     @PostConstruct
-    public void initializeUserPermissions() {
-        // 하드코딩된 사용자 권한 매핑 제거
-        // 이제 모든 권한은 Kafka SCRAM 인증을 통과한 사용자에게 동적으로 부여됩니다.
-        log.info("PermissionService 초기화 완료 - 하드코딩된 사용자 권한 제거됨");
+    public void initUserPermissions() {
+        // 예시 사용자 권한 설정 (실제 환경에서는 DB에서 조회)
+        userPermissions.put("admin", Permission.ADMIN);
+        userPermissions.put("sd", Permission.MANAGER);
+        userPermissions.put("urd", Permission.MONITOR);
+        
+        log.info("사용자 권한 초기화 완료: {}", userPermissions);
     }
 
     public boolean hasPermission(String username, Permission permission) {
-        // Kafka SCRAM 인증을 통과한 사용자는 기본적으로 모든 권한을 가집니다.
-        // 실제 환경에서는 사용자별 세부 권한을 DB나 외부 시스템에서 조회해야 합니다.
-        log.debug("권한 체크: {} - {} (Kafka SCRAM 인증 통과 사용자에게 모든 권한 허용)", username, permission);
-        return true;
+        Permission userPermission = userPermissions.getOrDefault(username, null);
+        
+        if (userPermission == null) {
+            log.debug("권한 체크: {} - {} = false (사용자 권한 없음)", username, permission.getCode());
+            return false;
+        }
+        
+        // ADMIN 권한이 있으면 모든 권한 허용
+        if (userPermission == Permission.ADMIN) {
+            log.debug("권한 체크: {} - {} = true (ADMIN 권한)", username, permission.getCode());
+            return true;
+        }
+        
+        // MANAGER 권한이 있으면 MONITOR 권한도 허용
+        if (userPermission == Permission.MANAGER && permission == Permission.MONITOR) {
+            log.debug("권한 체크: {} - {} = true (MANAGER 권한으로 MONITOR 접근)", username, permission.getCode());
+            return true;
+        }
+        
+        // 동일한 권한이면 허용
+        boolean hasPermission = userPermission == permission;
+        log.debug("권한 체크: {} (권한: {}) - {} = {}", username, userPermission.getCode(), permission.getCode(), hasPermission);
+        return hasPermission;
     }
 
     public boolean hasAnyPermission(String username, Permission... permissions) {
@@ -52,19 +73,40 @@ public class PermissionService {
     }
 
     public Set<Permission> getUserPermissions(String username) {
-        // Kafka SCRAM 인증을 통과한 사용자에게는 모든 권한을 부여
-        return new HashSet<>(Arrays.asList(Permission.values()));
+        Permission userPermission = userPermissions.get(username);
+        if (userPermission == null) {
+            return new HashSet<>();
+        }
+        
+        Set<Permission> permissions = new HashSet<>();
+        permissions.add(userPermission);
+        
+        // ADMIN 권한이 있으면 모든 권한 추가
+        if (userPermission == Permission.ADMIN) {
+            permissions.addAll(Arrays.asList(Permission.values()));
+        }
+        // MANAGER 권한이 있으면 MONITOR 권한도 추가
+        else if (userPermission == Permission.MANAGER) {
+            permissions.add(Permission.MONITOR);
+        }
+        
+        return permissions;
     }
 
     public List<String> getPermissionCodes(String username) {
         return getUserPermissions(username).stream()
                 .map(Permission::getCode)
+                .sorted()
                 .toList();
     }
 
-    public boolean canAccessRegion(String username, String region) {
-        // Kafka SCRAM 인증을 통과한 사용자는 모든 지역에 접근 가능
-        log.debug("지역 접근 체크: {} - {} (Kafka SCRAM 인증 통과 사용자에게 모든 지역 접근 허용)", username, region);
-        return true;
+    public Permission getUserPermission(String username) {
+        return userPermissions.getOrDefault(username, null);
+    }
+
+    public void setUserPermission(String username, Permission permission) {
+        userPermissions.put(username, permission);
+        log.info("사용자 권한 변경: {} -> {}", username, permission.getDescription());
     }
 }
+

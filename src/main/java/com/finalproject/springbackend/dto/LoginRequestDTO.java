@@ -16,4 +16,13 @@ public class LoginRequestDTO {
     
     @NotBlank(message = "비밀번호는 필수입니다")
     private String password;
+    
+    // 수동 getter 메서드 (Lombok이 작동하지 않을 경우를 대비)
+    public String getUsername() {
+        return username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
 }

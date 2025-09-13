@@ -4,9 +4,11 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
-//@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class}) // DB 연결이 없을 때
-@SpringBootApplication //DB 연결이 필요할 때
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@EnableScheduling
+//@SpringBootApplication
 public class SpringbackendApplication {
 
 	public static void main(String[] args) {
@@ -22,5 +24,17 @@ public class SpringbackendApplication {
 		//3. 설정 준비 후 Spring Boot 시작
 		SpringApplication.run(SpringbackendApplication.class, args);
 	}
-
 }
+
+/*
+http://43.203.121.250:9021/login
+ *     "permissions": [
+        "stream:raw_logs",
+        "stream:auth_logs",
+        "admin:all",
+        "stream:unauth_logs",
+        "region:ohio",
+        "stream:auth_failed_logs",
+        "region:seoul"
+    ]
+ */
