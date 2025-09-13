@@ -1,7 +1,6 @@
 package com.finalproject.springbackend.service;
 
 import com.finalproject.springbackend.dto.Permission;
-import com.finalproject.springbackend.dto.UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,8 +13,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PermissionService {
 
-    private final AuthService authService;
-    
     // 사용자별 권한 매핑
     private final Map<String, Set<Permission>> userPermissions = new HashMap<>();
 

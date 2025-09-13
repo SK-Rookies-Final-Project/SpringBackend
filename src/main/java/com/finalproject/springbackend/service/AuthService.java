@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -28,7 +30,12 @@ public class AuthService {
     @Value("${jwt.expiration:86400000}")
     private long jwtExpiration;
 
-    // 하드코딩된 사용자 정보 제거 - 이제 Kafka SCRAM 인증만 사용
+    @Value("${APP_DEFAULT_REGION:ohio}")
+    private String defaultRegion;
+
+    // 세션 기간 동안 사용자 비밀번호와 토픽을 보관 (메모리)
+    private final ConcurrentHashMap<String, String> usernameToPassword = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String[]> usernameToAllowedTopics = new ConcurrentHashMap<>();
 
     public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) {
         String username = loginRequest.getUsername();
@@ -36,94 +43,55 @@ public class AuthService {
 
         log.info("🔐 로그인 시도: {} (실제 Kafka SCRAM 계정으로 인증)", username);
 
-        // 1. 실제 Kafka 브로커의 SCRAM 인증 확인
-        log.info("📡 Kafka 브로커 SCRAM 인증 확인 중: {}", username);
-        boolean kafkaAuthSuccess = kafkaAuthenticationService.authenticateWithKafka(username, password);
-        
-        if (!kafkaAuthSuccess) {
-            log.error("❌ Kafka SCRAM 인증 실패: {} - 계정이 Kafka 브로커에 존재하지 않거나 비밀번호가 틀렸습니다.", username);
+        // SCRAM 인증 + 접근 가능 토픽 조회(후보 기반 프로빙 포함)
+        Set<String> accessibleTopics;
+        try {
+            accessibleTopics = kafkaAuthenticationService.listAccessibleTopics(username, password);
+        } catch (Exception e) {
+            log.error("❌ Kafka SCRAM 인증 실패: {} - {}", username, e.getMessage());
             return LoginResponseDTO.builder()
                     .success(false)
                     .message("Kafka SCRAM 인증에 실패했습니다. 계정 정보를 확인해주세요")
                     .build();
         }
 
-        // 2. JWT 토큰 생성 (지역 정보는 기본값 사용)
-        String region = determineRegionFromUsername(username);
+        // 내부 토픽(__*) 제외
+        String[] allowedTopics = accessibleTopics.stream()
+                .filter(t -> t != null && !t.startsWith("__"))
+                .sorted()
+                .toArray(String[]::new);
+
+        usernameToPassword.put(username, password);
+        usernameToAllowedTopics.put(username, allowedTopics);
+
+        String region = defaultRegion;
         String token = generateToken(username, region);
-        log.info("✅ 로그인 성공: {} (Kafka SCRAM 인증 완료, 지역: {})", username, region);
-        
+
         return LoginResponseDTO.builder()
                 .success(true)
                 .token(token)
                 .username(username)
                 .region(region)
                 .message("로그인 성공 (Kafka SCRAM 인증 완료)")
+                .allowedTopics(allowedTopics)
                 .build();
     }
 
-    /**
-     * 사용자명으로부터 지역을 결정합니다.
-     * 실제 환경에서는 사용자 정보를 DB에서 조회하거나 다른 방식으로 결정해야 합니다.
-     */
-    private String determineRegionFromUsername(String username) {
-        // 사용자명 패턴으로 지역 결정 (예: admin, ca는 seoul, 나머지는 ohio)
-        if ("admin".equals(username) || "ca".equals(username)) {
-            return "seoul";
-        } else {
-            return "ohio";
-        }
-    }
-
-    /**
-     * 사용자명으로부터 허용된 토픽을 결정합니다.
-     * 실제 환경에서는 사용자 권한을 DB에서 조회해야 합니다.
-     */
-    public String[] getAllowedTopicsForUser(String username) {
-        // 사용자명 패턴으로 권한 결정
-        switch (username) {
-            case "admin":
-                return new String[]{"authorized-access", "access-failed", "confluent-audit-log-events", "unauthorized-access"};
-            case "ca":
-                return new String[]{"authorized-access", "access-failed"};
-            case "ro":  // Read Only 사용자
-                return new String[]{"confluent-audit-log-events"};
-            case "dw":  // Data Warehouse 사용자
-                return new String[]{"confluent-audit-log-events", "unauthorized-access"};
-            case "dr":  // Data Reader 사용자
-                return new String[]{"confluent-audit-log-events"};
-            case "sd":
-                return new String[]{"confluent-audit-log-events", "unauthorized-access"};
-            case "cd":
-                return new String[]{"confluent-audit-log-events"};
-            case "urd":
-                return new String[]{"unauthorized-access"};
-            default:
-                // 기본적으로 모든 토픽 허용 (실제 환경에서는 제한적이어야 함)
-                return new String[]{"authorized-access", "access-failed", "confluent-audit-log-events", "unauthorized-access"};
-        }
-    }
-
     public UserInfo getUserInfo(String username) {
-        // 하드코딩된 사용자 정보 대신 동적으로 생성
         return UserInfo.builder()
                 .username(username)
-                .password("") // 비밀번호는 저장하지 않음
-                .region(determineRegionFromUsername(username))
-                .allowedTopics(getAllowedTopicsForUser(username))
+                .password(usernameToPassword.getOrDefault(username, ""))
+                .region(defaultRegion)
+                .allowedTopics(usernameToAllowedTopics.getOrDefault(username, new String[0]))
                 .build();
     }
 
     public boolean validateToken(String token) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-            Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            log.error("토큰 검증 실패: {}", e.getMessage());
             return false;
         }
     }
@@ -131,21 +99,14 @@ public class AuthService {
     public String getUsernameFromToken(String token) {
         try {
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject();
+            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
-            log.error("토큰에서 사용자명 추출 실패: {}", e.getMessage());
             return null;
         }
     }
 
     private String generateToken(String username, String region) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        
         return Jwts.builder()
                 .setSubject(username)
                 .claim("region", region)
@@ -155,9 +116,6 @@ public class AuthService {
                 .compact();
     }
 
-    /**
-     * Kafka 인증 테스트를 위한 메서드
-     */
     public boolean testKafkaAuthentication(String username, String password) {
         return kafkaAuthenticationService.authenticateWithKafka(username, password);
     }
