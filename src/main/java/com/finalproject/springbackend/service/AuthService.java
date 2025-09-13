@@ -3,26 +3,39 @@ package com.finalproject.springbackend.service;
 import com.finalproject.springbackend.dto.LoginRequestDTO;
 import com.finalproject.springbackend.dto.LoginResponseDTO;
 import com.finalproject.springbackend.dto.UserInfo;
+import com.finalproject.springbackend.dto.Permission;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final KafkaAuthenticationService kafkaAuthenticationService;
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
+    private final TopicService topicService;
+    private final PermissionService permissionService;
+    private final ResourceLevelFalseConsumer resourceLevelFalseConsumer;
+    private final SystemLevelFalseConsumer systemLevelFalseConsumer;
+    private final Certified2TimeConsumer certified2TimeConsumer;
+    private final CertifiedNotMoveConsumer certifiedNotMoveConsumer;
+
+    private final Set<String> blacklistedTokens = ConcurrentHashMap.newKeySet();
+    private final Map<String, String> userPasswords = new ConcurrentHashMap<>();
 
     @Value("${jwt.secret:mySecretKey}")
     private String jwtSecret;
@@ -30,66 +43,73 @@ public class AuthService {
     @Value("${jwt.expiration:86400000}")
     private long jwtExpiration;
 
-    @Value("${APP_DEFAULT_REGION:ohio}")
-    private String defaultRegion;
-
-    // 세션 기간 동안 사용자 비밀번호와 토픽을 보관 (메모리)
-    private final ConcurrentHashMap<String, String> usernameToPassword = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, String[]> usernameToAllowedTopics = new ConcurrentHashMap<>();
-
     public LoginResponseDTO authenticate(LoginRequestDTO loginRequest) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
 
-        log.info("🔐 로그인 시도: {} (실제 Kafka SCRAM 계정으로 인증)", username);
+        log.info("로그인 시도: {}", username);
 
-        // SCRAM 인증 + 접근 가능 토픽 조회(후보 기반 프로빙 포함)
-        Set<String> accessibleTopics;
         try {
-            accessibleTopics = kafkaAuthenticationService.listAccessibleTopics(username, password);
+            List<String> allowedTopics = topicService.listTopics(username, password);
+            String token = generateToken(username);
+            Permission userPermission = permissionService.getUserPermission(username);
+            String permissionDescription = userPermission != null ? userPermission.getDescription() : "권한 없음";
+
+            log.info("로그인 성공: {} ({}개 토픽, 권한: {})", username, allowedTopics.size(), permissionDescription);
+            
+            // 사용자 비밀번호 저장 (Consumer 시작용)
+            userPasswords.put(username, password);
+            
+            return LoginResponseDTO.builder()
+                    .success(true)
+                    .token(token)
+                    .username(username)
+                    .message("로그인 성공")
+                    .allowedTopics(allowedTopics.toArray(new String[0]))
+                    .permission(permissionDescription)
+                    .build();
         } catch (Exception e) {
-            log.error("❌ Kafka SCRAM 인증 실패: {} - {}", username, e.getMessage());
+            String errorMessage = determineErrorMessage(e);
+            log.error("로그인 실패: {} - {}", username, e.getMessage(), e);
             return LoginResponseDTO.builder()
                     .success(false)
-                    .message("Kafka SCRAM 인증에 실패했습니다. 계정 정보를 확인해주세요")
+                    .message(errorMessage)
                     .build();
         }
-
-        // 내부 토픽(__*) 제외
-        String[] allowedTopics = accessibleTopics.stream()
-                .filter(t -> t != null && !t.startsWith("__"))
-                .sorted()
-                .toArray(String[]::new);
-
-        usernameToPassword.put(username, password);
-        usernameToAllowedTopics.put(username, allowedTopics);
-
-        String region = defaultRegion;
-        String token = generateToken(username, region);
-
-        return LoginResponseDTO.builder()
-                .success(true)
-                .token(token)
-                .username(username)
-                .region(region)
-                .message("로그인 성공 (Kafka SCRAM 인증 완료)")
-                .allowedTopics(allowedTopics)
-                .build();
     }
 
-    public UserInfo getUserInfo(String username) {
-        return UserInfo.builder()
-                .username(username)
-                .password(usernameToPassword.getOrDefault(username, ""))
-                .region(defaultRegion)
-                .allowedTopics(usernameToAllowedTopics.getOrDefault(username, new String[0]))
-                .build();
+    private String determineErrorMessage(Exception e) {
+        String message = e.getMessage();
+        if (message == null) {
+            return "인증에 실패했습니다. 계정 정보를 확인해주세요";
+        }
+        
+        if (message.contains("timeout") || message.contains("timed out")) {
+            return "서버 연결 시간이 초과되었습니다. 잠시 후 다시 시도해주세요";
+        } else if (message.contains("connection") || message.contains("refused")) {
+            return "서버에 연결할 수 없습니다. 네트워크 상태를 확인해주세요";
+        } else if (message.contains("authentication") || message.contains("unauthorized")) {
+            return "인증에 실패했습니다. 사용자명과 비밀번호를 확인해주세요";
+        } else if (message.contains("Kafka")) {
+            return "시스템 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요";
+        } else {
+            return "인증에 실패했습니다. 계정 정보를 확인해주세요";
+        }
     }
 
     public boolean validateToken(String token) {
         try {
+            if (blacklistedTokens.contains(token)) {
+                return false;
+            }
+
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+
+            if (claims.getExpiration().before(new Date())) {
+                return false;
+            }
+
             return true;
         } catch (Exception e) {
             return false;
@@ -98,6 +118,10 @@ public class AuthService {
 
     public String getUsernameFromToken(String token) {
         try {
+            if (blacklistedTokens.contains(token)) {
+                return null;
+            }
+
             SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
         } catch (Exception e) {
@@ -105,18 +129,64 @@ public class AuthService {
         }
     }
 
-    private String generateToken(String username, String region) {
+    public void revokeToken(String token) {
+        try {
+            if (token != null && !token.trim().isEmpty()) {
+                blacklistedTokens.add(token);
+                String username = getUsernameFromToken(token);
+                log.info("토큰 무효화 완료: {}", username != null ? username : "알 수 없음");
+                
+                // 로그아웃 시 사용자 비밀번호 제거
+                if (username != null) {
+                    userPasswords.remove(username);
+                    log.info("사용자 {}의 비밀번호 정보 제거", username);
+                }
+                
+                cleanupExpiredTokens();
+            }
+        } catch (Exception e) {
+            log.error("토큰 무효화 중 오류 발생: {}", e.getMessage());
+        }
+    }
+
+    private void cleanupExpiredTokens() {
+        try {
+            Set<String> expiredTokens = ConcurrentHashMap.newKeySet();
+
+            for (String token : blacklistedTokens) {
+                try {
+                    SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+                    Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+
+                    if (claims.getExpiration().before(new Date())) {
+                        expiredTokens.add(token);
+                    }
+                } catch (Exception e) {
+                    expiredTokens.add(token);
+                }
+            }
+
+            blacklistedTokens.removeAll(expiredTokens);
+        } catch (Exception e) {
+            log.warn("만료된 토큰 정리 중 오류 발생: {}", e.getMessage());
+        }
+    }
+
+    public int getBlacklistedTokenCount() {
+        return blacklistedTokens.size();
+    }
+
+    public String getUserPassword(String username) {
+        return userPasswords.get(username);
+    }
+
+    private String generateToken(String username) {
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         return Jwts.builder()
                 .setSubject(username)
-                .claim("region", region)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
-    }
-
-    public boolean testKafkaAuthentication(String username, String password) {
-        return kafkaAuthenticationService.authenticateWithKafka(username, password);
     }
 }

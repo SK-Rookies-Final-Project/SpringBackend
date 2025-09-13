@@ -1,99 +1,272 @@
 package com.finalproject.springbackend.service;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 @Service
 public class SseService {
     
-    // SSE Emitter 저장소들
-    private final Map<String, SseEmitter> rawLogEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> authorizedEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> unauthorizedEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> authFailedEmitters = new ConcurrentHashMap<>();
-
-    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
-    private final Map<String, SseEmitter> oneEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> twoEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> threeEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> fourEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> fiveEmitters = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter> sixEmitters = new ConcurrentHashMap<>();
+    // 사용자별 SSE 연결 관리 (username -> clientId -> SseEmitter)
+    private final Map<String, Map<String, SseEmitter>> userCertified2TimeEmitters = new ConcurrentHashMap<>(); 
+    private final Map<String, Map<String, SseEmitter>> userSystemLevelFalseEmitters = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, SseEmitter>> userResourceLevelFalseEmitters = new ConcurrentHashMap<>();
+    private final Map<String, Map<String, SseEmitter>> userCertifiedNotMoveEmitters = new ConcurrentHashMap<>();
+    
+    // 기존 방식 유지 (하위 호환성을 위해)
+    private final Map<String, SseEmitter> certified2TimeEmitters = new ConcurrentHashMap<>(); 
+    private final Map<String, SseEmitter> systemLevelFalseEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> resourceLevelFalseEmitters = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter> certifiedNotMoveEmitters = new ConcurrentHashMap<>();
 
 
-    // Raw 로그 스트림 생성
-    public SseEmitter createRawLogStream() {
-        return createSseConnection(rawLogEmitters);
+    public SseEmitter createSystemLevelFalseStream() {
+        log.info("SSE 스트림 생성: system-level-false 토픽");
+        return createSseConnection(systemLevelFalseEmitters, "system-level-false");
     }
     
-    // 인증된 접근 스트림 생성
-    public SseEmitter createAuthorizedStream() {
-        return createSseConnection(authorizedEmitters);
+    public SseEmitter createResourceLevelFalseStream() {
+        log.info("SSE 스트림 생성: resource-level-false-json 토픽");
+        return createSseConnection(resourceLevelFalseEmitters, "resource-level-false-json");
     }
     
-    // 인증되지 않은 접근 스트림 생성
-    public SseEmitter createUnauthorizedStream() {
-        return createSseConnection(unauthorizedEmitters);
+    public SseEmitter createCertifiedNotMoveStream() {
+        log.info("SSE 스트림 생성: certified-notMove 토픽");
+        return createSseConnection(certifiedNotMoveEmitters, "certified-notMove");
     }
     
-    // 인증 실패 스트림 생성
-    public SseEmitter createAuthFailedStream() {
-        return createSseConnection(authFailedEmitters);
+    public SseEmitter createCertified2TimeStream() {
+        log.info("SSE 스트림 생성: certified-2time 토픽");
+        return createSseConnection(certified2TimeEmitters, "certified-2time");
+    }
+    
+    // 사용자별 SSE 연결 생성 메서드들
+    public SseEmitter createUserSystemLevelFalseStream(String username) {
+        log.info("사용자별 SSE 스트림 생성: system-level-false 토픽, 사용자: {}", username);
+        return createUserSseConnection(userSystemLevelFalseEmitters, username, "system-level-false");
+    }
+    
+    public SseEmitter createUserResourceLevelFalseStream(String username) {
+        log.info("사용자별 SSE 스트림 생성: resource-level-false-json 토픽, 사용자: {}", username);
+        return createUserSseConnection(userResourceLevelFalseEmitters, username, "resource-level-false-json");
+    }
+    
+    public SseEmitter createUserCertifiedNotMoveStream(String username) {
+        log.info("사용자별 SSE 스트림 생성: certified-notMove 토픽, 사용자: {}", username);
+        return createUserSseConnection(userCertifiedNotMoveEmitters, username, "certified-notMove");
+    }
+    
+    public SseEmitter createUserCertified2TimeStream(String username) {
+        log.info("사용자별 SSE 스트림 생성: certified-2time 토픽, 사용자: {}", username);
+        return createUserSseConnection(userCertified2TimeEmitters, username, "certified-2time");
     }
 
-    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
-    public SseEmitter createOneStream() { return createSseConnection(oneEmitters); }
-    public SseEmitter createTwoStream() { return createSseConnection(twoEmitters); }
-    public SseEmitter createThreeStream() { return createSseConnection(threeEmitters); }
-    public SseEmitter createFourStream() { return createSseConnection(fourEmitters); }
-    public SseEmitter createFiveStream() { return createSseConnection(fiveEmitters); }
-    public SseEmitter createSixStream() { return createSseConnection(sixEmitters); }
-    
-    // 공통 SSE 연결 생성 로직
-    private SseEmitter createSseConnection(Map<String, SseEmitter> emitterMap) {
-        // clientId를 랜덤값으로 정하겠다
+    private SseEmitter createSseConnection(Map<String, SseEmitter> emitterMap, String topicName) {
         String clientId = java.util.UUID.randomUUID().toString();
-
-        // Long 타입의 최대값을 열어둘 시간으로 지정하고 데이터의 통로를 열어두겠다
         SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-
-        // clientId와 emitter를 연결하겠다
         emitterMap.put(clientId, emitter);
         
-        // 연결 종료 시 정리
-        emitter.onCompletion(() -> emitterMap.remove(clientId));
-        emitter.onTimeout(() -> emitterMap.remove(clientId));
-        emitter.onError((throwable) -> emitterMap.remove(clientId));
+        log.info("SSE 연결 생성 완료: {} 토픽, Client ID: {}, 활성 연결 수: {}", 
+                topicName, clientId, emitterMap.size());
+        
+        emitter.onCompletion(() -> {
+            emitterMap.remove(clientId);
+            log.info("SSE 연결 완료: {} 토픽, 남은 연결 수: {}", topicName, emitterMap.size());
+        });
+        
+        emitter.onTimeout(() -> {
+            emitterMap.remove(clientId);
+            log.warn("SSE 연결 타임아웃: {} 토픽, 남은 연결 수: {}", topicName, emitterMap.size());
+        });
+        
+        emitter.onError((throwable) -> {
+            emitterMap.remove(clientId);
+            log.error("SSE 연결 오류: {} 토픽, 오류: {}, 남은 연결 수: {}", 
+                    topicName, throwable.getMessage(), emitterMap.size());
+        });
         
         return emitter;
     }
     
-    // Getter 메소드들 - Consumer에서 접근하기 위함
-    public Map<String, SseEmitter> getRawLogEmitters() {
-        return rawLogEmitters;
+    private SseEmitter createUserSseConnection(Map<String, Map<String, SseEmitter>> userEmitterMap, String username, String topicName) {
+        // 기존 연결이 있다면 모두 정리
+        closeUserConnections(userEmitterMap, username, topicName);
+        
+        // 사용자별 연결 맵이 없으면 생성
+        userEmitterMap.computeIfAbsent(username, k -> new ConcurrentHashMap<>());
+        Map<String, SseEmitter> userEmitters = userEmitterMap.get(username);
+        
+        String clientId = java.util.UUID.randomUUID().toString();
+        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        userEmitters.put(clientId, emitter);
+        
+        log.info("사용자별 SSE 연결 생성 완료: {} 토픽, 사용자: {}, Client ID: {}, 활성 연결 수: {}", 
+                topicName, username, clientId, userEmitters.size());
+        
+        emitter.onCompletion(() -> {
+            userEmitters.remove(clientId);
+            if (userEmitters.isEmpty()) {
+                userEmitterMap.remove(username);
+            }
+            log.info("사용자별 SSE 연결 완료: {} 토픽, 사용자: {}, 남은 연결 수: {}", 
+                    topicName, username, userEmitters.size());
+        });
+        
+        emitter.onTimeout(() -> {
+            userEmitters.remove(clientId);
+            if (userEmitters.isEmpty()) {
+                userEmitterMap.remove(username);
+            }
+            log.warn("사용자별 SSE 연결 타임아웃: {} 토픽, 사용자: {}, 남은 연결 수: {}", 
+                    topicName, username, userEmitters.size());
+        });
+        
+        emitter.onError((throwable) -> {
+            userEmitters.remove(clientId);
+            if (userEmitters.isEmpty()) {
+                userEmitterMap.remove(username);
+            }
+            // IOException은 연결 중단으로 간주하여 WARN 레벨로 처리
+            if (throwable instanceof IOException) {
+                log.warn("사용자별 SSE 연결 중단: {} 토픽, 사용자: {}, Client ID: {}, 오류: {}, 남은 연결 수: {}", 
+                        topicName, username, clientId, throwable.getMessage(), userEmitters.size());
+            } else {
+                log.error("사용자별 SSE 연결 오류: {} 토픽, 사용자: {}, Client ID: {}, 오류: {}, 남은 연결 수: {}", 
+                        topicName, username, clientId, throwable.getMessage(), userEmitters.size());
+            }
+        });
+        
+        return emitter;
     }
     
-    public Map<String, SseEmitter> getAuthorizedEmitters() {
-        return authorizedEmitters;
+    // 사용자의 모든 SSE 연결 정리
+    public void closeUserConnections(String username) {
+        closeUserConnections(userCertified2TimeEmitters, username, "certified-2time");
+        closeUserConnections(userSystemLevelFalseEmitters, username, "system-level-false");
+        closeUserConnections(userResourceLevelFalseEmitters, username, "resource-level-false-json");
+        closeUserConnections(userCertifiedNotMoveEmitters, username, "certified-notMove");
+        log.info("사용자 {}의 모든 SSE 연결 정리 완료", username);
     }
     
-    public Map<String, SseEmitter> getUnauthorizedEmitters() {
-        return unauthorizedEmitters;
+    private void closeUserConnections(Map<String, Map<String, SseEmitter>> userEmitterMap, String username, String topicName) {
+        Map<String, SseEmitter> userEmitters = userEmitterMap.get(username);
+        if (userEmitters != null && !userEmitters.isEmpty()) {
+            log.info("사용자 {}의 기존 {} 연결 {}개 정리 중", username, topicName, userEmitters.size());
+            userEmitters.forEach((clientId, emitter) -> {
+                try {
+                    emitter.complete();
+                } catch (Exception e) {
+                    log.warn("SSE 연결 정리 중 오류: {}", e.getMessage());
+                }
+            });
+            userEmitters.clear();
+            userEmitterMap.remove(username);
+        }
     }
     
-    public Map<String, SseEmitter> getAuthFailedEmitters() {
-        return authFailedEmitters;
+    public Map<String, SseEmitter> getCertified2TimeEmitters() {
+        return certified2TimeEmitters;
     }
-
-    //우기님이 추가해주시면 바로 토픽명 추가 ㄱㄱ
-    public Map<String, SseEmitter> getOneEmitters() { return oneEmitters; }
-    public Map<String, SseEmitter> getTwoEmitters() { return twoEmitters; }
-    public Map<String, SseEmitter> getThreeEmitters() { return threeEmitters; }
-    public Map<String, SseEmitter> getFourEmitters() { return fourEmitters; }
-    public Map<String, SseEmitter> getFiveEmitters() { return fiveEmitters; }
-    public Map<String, SseEmitter> getSixEmitters() { return sixEmitters; }
+    
+    public Map<String, SseEmitter> getSystemLevelFalseEmitters() {
+        return systemLevelFalseEmitters;
+    }
+    
+    public Map<String, SseEmitter> getResourceLevelFalseEmitters() {
+        return resourceLevelFalseEmitters;
+    }
+    
+    public Map<String, SseEmitter> getCertifiedNotMoveEmitters() {
+        return certifiedNotMoveEmitters;
+    }
+    
+    // 사용자별 SSE 연결 getter 메서드들
+    public Map<String, SseEmitter> getUserCertified2TimeEmitters(String username) {
+        return userCertified2TimeEmitters.getOrDefault(username, new ConcurrentHashMap<>());
+    }
+    
+    public Map<String, SseEmitter> getUserSystemLevelFalseEmitters(String username) {
+        return userSystemLevelFalseEmitters.getOrDefault(username, new ConcurrentHashMap<>());
+    }
+    
+    public Map<String, SseEmitter> getUserResourceLevelFalseEmitters(String username) {
+        return userResourceLevelFalseEmitters.getOrDefault(username, new ConcurrentHashMap<>());
+    }
+    
+    public Map<String, SseEmitter> getUserCertifiedNotMoveEmitters(String username) {
+        return userCertifiedNotMoveEmitters.getOrDefault(username, new ConcurrentHashMap<>());
+    }
+    
+    // 모든 사용자별 SSE 연결 정보 조회
+    public Map<String, Map<String, SseEmitter>> getAllUserCertified2TimeEmitters() {
+        return userCertified2TimeEmitters;
+    }
+    
+    public Map<String, Map<String, SseEmitter>> getAllUserSystemLevelFalseEmitters() {
+        return userSystemLevelFalseEmitters;
+    }
+    
+    public Map<String, Map<String, SseEmitter>> getAllUserResourceLevelFalseEmitters() {
+        return userResourceLevelFalseEmitters;
+    }
+    
+    public Map<String, Map<String, SseEmitter>> getAllUserCertifiedNotMoveEmitters() {
+        return userCertifiedNotMoveEmitters;
+    }
+    
+    // 연결 상태 체크 및 정리 메서드
+    public void cleanupInactiveConnections() {
+        cleanupUserConnections(userCertified2TimeEmitters, "certified-2time");
+        cleanupUserConnections(userSystemLevelFalseEmitters, "system-level-false");
+        cleanupUserConnections(userResourceLevelFalseEmitters, "resource-level-false-json");
+        cleanupUserConnections(userCertifiedNotMoveEmitters, "certified-notMove");
+    }
+    
+    // 주기적으로 비활성 연결 정리 (10분마다 실행)
+    @Scheduled(fixedRate = 600000) // 10분 = 600,000ms
+    public void scheduledCleanup() {
+        try {
+            log.debug("SSE 연결 상태 체크 및 정리 시작");
+            cleanupInactiveConnections();
+            log.debug("SSE 연결 상태 체크 및 정리 완료");
+        } catch (Exception e) {
+            log.error("SSE 연결 정리 중 오류 발생: {}", e.getMessage(), e);
+        }
+    }
+    
+    private void cleanupUserConnections(Map<String, Map<String, SseEmitter>> userEmitterMap, String topicName) {
+        userEmitterMap.forEach((username, userEmitters) -> {
+            if (userEmitters != null && !userEmitters.isEmpty()) {
+                // ConcurrentModificationException 방지를 위해 복사본 생성
+                Map<String, SseEmitter> emittersCopy = new ConcurrentHashMap<>(userEmitters);
+                emittersCopy.forEach((clientId, emitter) -> {
+                    try {
+                        // 연결 상태 체크를 위해 heartbeat 전송 (ping 대신)
+                        emitter.send(SseEmitter.event()
+                                .name("heartbeat")
+                                .data("{\"type\":\"heartbeat\",\"timestamp\":" + System.currentTimeMillis() + "}", 
+                                      MediaType.APPLICATION_JSON));
+                    } catch (Exception e) {
+                        log.debug("비활성 연결 감지 및 정리: {} 토픽, 사용자: {}, Client ID: {}, 오류: {}", 
+                                topicName, username, clientId, e.getMessage());
+                        userEmitters.remove(clientId);
+                    }
+                });
+                
+                // 빈 사용자 맵 정리
+                if (userEmitters.isEmpty()) {
+                    userEmitterMap.remove(username);
+                    log.debug("사용자 {}의 {} 토픽 연결이 모두 정리됨", username, topicName);
+                }
+            }
+        });
+    }
 
 }
