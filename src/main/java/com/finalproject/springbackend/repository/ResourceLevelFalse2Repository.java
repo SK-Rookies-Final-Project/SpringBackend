@@ -55,6 +55,7 @@ public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLev
             @Param("principal") String principal,
             @Param("resourceName") String resourceName
     );
+
     //시간 + principal + operation
     @Query("""
         SELECT r FROM ResourceLevelFalse2 r
@@ -69,6 +70,7 @@ public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLev
             @Param("principal") String principal,
             @Param("operation") String operation
     );
+
     //시간 + principal + clientIp
     @Query("""
         SELECT r FROM ResourceLevelFalse2 r
@@ -83,6 +85,7 @@ public interface ResourceLevelFalse2Repository extends JpaRepository<ResourceLev
             @Param("principal") String principal,
             @Param("clientIp") String clientIp
     );
+
     //시간 + resource_name + operation
     @Query("""
         SELECT r FROM ResourceLevelFalse2 r
