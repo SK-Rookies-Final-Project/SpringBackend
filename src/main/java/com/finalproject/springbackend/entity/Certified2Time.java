@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name="\"certified-2-time\"")
+@Table(name="`certified-2time`")
 @Getter @Setter @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,16 +18,16 @@ public class Certified2Time {
     @Column(name="client_ip", columnDefinition="text")
     private String clientIp;
 
-    @Column(name="alert_time_kst",columnDefinition="timestamptz", nullable = false)
+    @Column(name="alert_time_kst", columnDefinition="timestamptz", nullable = false)
     private OffsetDateTime alertTimeKST;
 
-    @Column(name="alert_type", columnDefinition = "text")
+    @Column(name="alert_type", columnDefinition = "text", nullable = false)
     private String alertType;
 
-    @Column(name="description", columnDefinition = "text")
+    @Column(name="description", columnDefinition = "text", nullable = false)
     private String description;
 
-    @Column(name="failure_count", columnDefinition = "BIGINT")
+    @Column(name="failure_count", columnDefinition = "BIGINT", nullable = false)
     private Long failureCount;
 
 

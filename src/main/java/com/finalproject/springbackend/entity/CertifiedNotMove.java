@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name="\"certified-not-move\"")
+@Table(name="`certified-notMove`")
 @Getter @Setter @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,19 +14,19 @@ public class CertifiedNotMove {
     @Id @Column(columnDefinition="text")
     private String id;
 
-    @Column(name="client_ip", columnDefinition="text")
+    @Column(name="client_ip", columnDefinition="text", nullable = false)
     private String clientIp;
 
     @Column(name="alert_time_kst",columnDefinition="timestamptz", nullable = false)
     private OffsetDateTime alertTimeKST;
 
-    @Column(name="alert_type", columnDefinition = "text")
+    @Column(name="alert_type", columnDefinition = "text", nullable = false)
     private String alertType;
 
-    @Column(name="description", columnDefinition = "text")
+    @Column(name="description", columnDefinition = "text", nullable = false)
     private String description;
 
-    @Column(name="failure_count", columnDefinition = "BIGINT")
+    @Column(name="failure_count", columnDefinition = "BIGINT", nullable = false)
     private Long failureCount;
 
 }

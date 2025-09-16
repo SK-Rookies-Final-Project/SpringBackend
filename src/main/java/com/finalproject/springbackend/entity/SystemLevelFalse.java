@@ -15,10 +15,10 @@ public class SystemLevelFalse {
     @Id @Column(columnDefinition="text")
     private String id;
 
-    @Column(name="event-time-kst", columnDefinition = "timestamptz", nullable = false)
+    @Column(name="event_time_kst", columnDefinition = "timestamptz", nullable = false)
     private OffsetDateTime eventTimeKST;
 
-    @Column(name="process-time-kst",columnDefinition = "timestamptz", nullable = false)
+    @Column(name="processing_time_kst",columnDefinition = "timestamptz", nullable = false)
     private OffsetDateTime processTimeKST;
 
     @Column(name="principal", columnDefinition="text")
@@ -33,10 +33,10 @@ public class SystemLevelFalse {
     @Column(name="granted", columnDefinition="boolean")
     private boolean granted;
 
-    @Column(name="resource-type", columnDefinition="text")
+    @Column(name="resource_type", columnDefinition="text")
     private String resourceType;
 
-    @Column(name="resource-name", columnDefinition="text")
+    @Column(name="resource_name", columnDefinition="text")
     private String resourceName;
 
     @Column(name="operation", columnDefinition="text")
