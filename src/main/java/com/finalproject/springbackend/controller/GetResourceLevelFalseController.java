@@ -29,13 +29,13 @@ public class GetResourceLevelFalseController {
      */
 
     /** 전체 레코드 전부 반환*/
-    @GetMapping("/all")
+    @GetMapping
     public ResponseEntity<List<ResourceLevelFalse>> getAll(){
         List<ResourceLevelFalse> rlfAll = rlfService.getAll();
         return ResponseEntity.ok(rlfAll);
     }
     /** 전체 레코드 갯수 */
-    @GetMapping("/all/count")
+    @GetMapping("/count")
     public ResponseEntity<Long> getCount(){
         return ResponseEntity.ok(rlfService.getCount());
     }

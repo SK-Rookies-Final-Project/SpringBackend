@@ -18,30 +18,5 @@ public class GetRecordController {
     private final CertifiedNotMoveService cnmService;
     private final ResourceLevelFalseService rlf2Service;
 
-    /**
-     * 테이블 레코드 전체를 가져오는 엔드포인트 ( /<레코드>/all )
-     */
-    //system-level-false 테이블의 레코드 전체를 가져오는 클래스
-//    @GetMapping("/system_level_false/all")
-//    public ResponseEntity<List<SystemLevelFalse>> getAllSLF() {
-//        List<SystemLevelFalse> slf = slfService.getAll();
-//        return ResponseEntity.ok(slf);
-//    }
-
-    //certified-2-time 테이블의 레코드 전체를 가져오는 클래스
-    @GetMapping("/certified_2_time/all")
-    public ResponseEntity<List<Certified2Time>> getAllC2T() {
-        List<Certified2Time> c2t = c2tService.getAll();
-        return ResponseEntity.ok(c2t);
-    }
-
-    //certified-not-move 테이블의 레코드 전체를 가져오는 클래스
-    @GetMapping("/certified_not_move/all")
-    public ResponseEntity<List<CertifiedNotMove>> getAllCNM() {
-        List<CertifiedNotMove> cnm = cnmService.getAll();
-
-        return ResponseEntity.ok(cnm);
-    }
-
 
 }

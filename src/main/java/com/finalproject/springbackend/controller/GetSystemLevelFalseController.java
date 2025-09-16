@@ -19,13 +19,13 @@ public class GetSystemLevelFalseController {
     private final SystemLevelFalseService slfService;
 
     /**전체 레코드 반환*/
-    @GetMapping(value = "/all")
+    @GetMapping
     public ResponseEntity<List<SystemLevelFalse>> getAll(){
         List<SystemLevelFalse> slfList = slfService.getAll();
         return ResponseEntity.ok(slfList);
     }
     /**전체 레코드 갯수 반환*/
-    @GetMapping(value = "/count/all")
+    @GetMapping(value = "/count")
     public ResponseEntity<Long> getAllCount(){
         return ResponseEntity.ok(slfService.getCount());
     }
