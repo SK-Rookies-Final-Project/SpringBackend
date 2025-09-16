@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CertifiedNotMoveRepository extends JpaRepository<CertifiedNotMove, Long>{
+public interface CertifiedNotMoveRepository extends JpaRepository<CertifiedNotMove, String>{
 }

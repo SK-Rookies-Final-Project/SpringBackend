@@ -12,27 +12,33 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class SystemLevelFalse {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id @Column(columnDefinition="text")
+    private String id;
 
-    @Column(columnDefinition = "timestamptz")
+    @Column(name="event-time-kst", columnDefinition = "timestamptz", nullable = false)
     private OffsetDateTime eventTimeKST;
 
-    @Column(columnDefinition = "timestamptz")
-    private OffsetDateTime processingTimeKST;
+    @Column(name="process-time-kst",columnDefinition = "timestamptz", nullable = false)
+    private OffsetDateTime processTimeKST;
 
-
+    @Column(name="principal", columnDefinition="text")
     private String principal;
 
+    @Column(name="client_ip", columnDefinition="text")
     private String clientIp;
 
+    @Column(name="method_name", columnDefinition="text")
     private String methodName;
 
+    @Column(name="granted", columnDefinition="boolean")
     private boolean granted;
 
+    @Column(name="resource-type", columnDefinition="text")
     private String resourceType;
 
+    @Column(name="resource-name", columnDefinition="text")
     private String resourceName;
 
+    @Column(name="operation", columnDefinition="text")
     private String operation;
 }

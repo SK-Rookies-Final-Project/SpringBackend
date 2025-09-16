@@ -1,6 +1,9 @@
 package com.finalproject.springbackend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 import java.time.OffsetDateTime;
@@ -12,42 +15,37 @@ import java.time.OffsetDateTime;
 @AllArgsConstructor
 public class ResourceLevelFalse {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id @Column(columnDefinition = "text")
+    private String id;      // 기본키
 
-    @Column(columnDefinition = "timestamptz")
-    private OffsetDateTime eventTimeKST;
+    //지금은 해당 컬럼의 자료형이 text라 나중에 주석 해제하고 사용하기
+    @Column(name = "event_time_kst", columnDefinition = "timestamptz", nullable = false)
+    private OffsetDateTime eventTimeKST;    // 특정 이벤트가 일어 난 한국 시간(UTC +9)
 
-    @Column(columnDefinition = "timestamptz")
-    private OffsetDateTime processingTimeKST;
+    //지금은 해당 컬럼의 자료형이 text라 나중에 주석 해제하고 사용하기
+    @Column(name = "processing_time_kst", columnDefinition = "timestamptz", nullable = false)
+    private OffsetDateTime processTimeKST;  // Flink로 특정 이벤트가 변경 된 한국 시간 (UTC +9)
 
-    private String principal;
+    @Column(name = "principal", columnDefinition = "text")
+    private String principal;   // 유저 이름
 
-    private String clientIp;
+    @Column(name = "client_ip", columnDefinition="text")
+    private String clientIp;        //어떤 IP에서 비인가 접근을 시도했는지
 
-    private String methodName;
+    @Column(name = "method_name", columnDefinition="text")
+    private String methodName;  // kafka.Produce, MDS.Authorize, kafka.Metadata 등등 개많음
 
+    @Column(name="granted", columnDefinition="boolean")
     private boolean granted;
 
+    @Column(name = "resource_type", columnDefinition="text")
     private String resourceType;
 
-    private String resourceName;
+    @Column(name = "resource_name", columnDefinition="text")
+    private String resourceName;    // 어디 리소스에서 권한이 없는 행동을 했는지 (ex: audit-topic)
 
-    private String operation;
-
+    @Column(name = "operation", columnDefinition = "text")
+    private String operation;   // 특정 유저가 해당 리소스에 권한이 없는 어떤 행동을 했는지
 
 
 }
-// 토픽명: resource-level-false
-// {
-//  "eventTimeKST": "2025-09-11 11:05:32.185 KST",
-//  "processingTimeKST": "2025-09-11 11:05:32.774 KST",
-//  "principal": "User:dr",
-//  "clientIp": "15.164.187.115",
-//  "methodName": "kafka.DescribeConfigs",
-//  "granted": false,
-//  "resourceType": "Topic",
-//  "resourceName": "audit-topic",
-//  "operation": "DescribeConfigs"
-//}
-

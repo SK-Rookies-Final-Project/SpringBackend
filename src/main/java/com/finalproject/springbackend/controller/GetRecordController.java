@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -17,8 +16,7 @@ public class GetRecordController {
     private final SystemLevelFalseService slfService;
     private final Certified2TimeService c2tService;
     private final CertifiedNotMoveService cnmService;
-    private final ResourceLevelFalseService rlfService;
-    private final ResourceLevelFalse2Service rlf2Service;
+    private final ResourceLevelFalseService rlf2Service;
 
     /**
      * 테이블 레코드 전체를 가져오는 엔드포인트 ( /<레코드>/all )
@@ -45,12 +43,5 @@ public class GetRecordController {
         return ResponseEntity.ok(cnm);
     }
 
-//    //resource_level_false 테이블 레코드 전체를 가져오는 클래스
-//    @GetMapping("/resource_level_false/all")
-//    public ResponseEntity<List<ResourceLevelFalse>> getAllRLF() {
-//        List<ResourceLevelFalse> rlf = rlfService.getAll();
-//
-//        return ResponseEntity.ok(rlf);
-//    }
 
 }

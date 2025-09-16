@@ -5,5 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface Certified2TimeRepository extends JpaRepository<Certified2Time, Long>{
+public interface Certified2TimeRepository extends JpaRepository<Certified2Time, String>{
 }

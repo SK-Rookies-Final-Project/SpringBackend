@@ -11,19 +11,23 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CertifiedNotMove {
+    @Id @Column(columnDefinition="text")
+    private String id;
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Column(name="client_ip", columnDefinition="text")
     private String clientIp;
 
-    @Column(columnDefinition = "timestamptz")
-    private OffsetDateTime alertTime;
+    @Column(name="alert_time_kst",columnDefinition="timestamptz", nullable = false)
+    private OffsetDateTime alertTimeKST;
 
-    private int failureCount;
+    @Column(name="alert_type", columnDefinition = "text")
+    private String alertType;
 
-    @Column(columnDefinition = "text")
-    private String message;
+    @Column(name="description", columnDefinition = "text")
+    private String description;
+
+    @Column(name="failure_count", columnDefinition = "BIGINT")
+    private Long failureCount;
 
 }
 
