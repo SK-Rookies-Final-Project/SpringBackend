@@ -60,7 +60,7 @@ public class SystemLevelFalseService {
     private String correctionOfPrincipal(String principal){
         if(principal == null || principal.isBlank()) { throw new IllegalArgumentException("principal을 넣어주세요"); }
         principal = principal.replaceAll("\\s+", "");
-        if(principal.startsWith("User:")) { principal = "User:" + principal; }
+        if(!principal.startsWith("User:")) { principal = "User:" + principal; }
         return principal;
     }
 
@@ -106,37 +106,37 @@ public class SystemLevelFalseService {
     //하나의 컬럼으로 레코드 찾기
     public List<SystemLevelFalse> getPrincipal(String principal) {
         principal = correctionOfPrincipal(principal);
-        return repo.findByNoTimePrincipal(principal);
+        return repo.findByPrincipal(principal);
     }
     public List<SystemLevelFalse> getResourceName(String resourceName) {
         resourceName = correctionOfResourceName(resourceName);
-        return repo.findByNoTimeResourceName(resourceName);
+        return repo.findByResourceName(resourceName);
     }
     public List<SystemLevelFalse> getOperation(String operation) {
         operation = correctionOfOperation(operation);
-        return repo.findByNoTimeOperation(operation);
+        return repo.findByOperation(operation);
     }
     public List<SystemLevelFalse> getClientIp(String clientIp) {
         clientIp = correctionOfClientIp(clientIp);
-        return repo.findByNoTimeClientIp(clientIp);
+        return repo.findByClientIp(clientIp);
     }
 
     //하나의 컬럼으로 찾은 레코드의 갯수
     public Long getPrincipalCount(String principal) {
         principal = correctionOfPrincipal(principal);
-        return repo.countByNoTimePrincipal(principal);
+        return repo.countByPrincipal(principal);
     }
     public Long getResourceNameCount(String resourceName) {
         resourceName = correctionOfResourceName(resourceName);
-        return repo.countByNoTimeResourceName(resourceName);
+        return repo.countByResourceName(resourceName);
     }
     public Long getOperationCount(String operation) {
         operation = correctionOfOperation(operation);
-        return repo.countByNoTimeOperation(operation);
+        return repo.countByOperation(operation);
     }
     public Long getClientIpCount(String clientIp) {
         clientIp = correctionOfClientIp(clientIp);
-        return repo.countByNoTimeClientIp(clientIp);
+        return repo.countByClientIp(clientIp);
     }
 
     //시간 + 하나의 컬럼

@@ -22,7 +22,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param("end") OffsetDateTime end
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
+        SELECT COUNT(s) FROM SystemLevelFalse s
         WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
     """)
     Long findByTimeOnlyCount(
@@ -31,22 +31,22 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
 
     /**각 필드 별 레코드 반환*/
-    List<SystemLevelFalse> findByNoTimePrincipal(String principal);
-    List<SystemLevelFalse> findByNoTimeResourceName(String resourceName);
-    List<SystemLevelFalse> findByNoTimeOperation(String operation);
-    List<SystemLevelFalse> findByNoTimeClientIp(String clientIp);
+    List<SystemLevelFalse> findByPrincipal(String principal);
+    List<SystemLevelFalse> findByResourceName(String resourceName);
+    List<SystemLevelFalse> findByOperation(String operation);
+    List<SystemLevelFalse> findByClientIp(String clientIp);
 
     /**각 필드 별 레코드 갯수*/
-    Long countByNoTimePrincipal(String principal);
-    Long countByNoTimeResourceName(String resourceName);
-    Long countByNoTimeOperation(String opeartion);
-    Long countByNoTimeClientIp(String clientIp);
+    Long countByPrincipal(String principal);
+    Long countByResourceName(String resourceName);
+    Long countByOperation(String operation);
+    Long countByClientIp(String clientIp);
 
     /**시간 + 하나의 컬럼 레코드 및 갯수*/
     //start + end + principal
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
         ORDER BY s.eventTimeKST ASC
     """)
@@ -56,8 +56,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
     //start + end + principal 갯수
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
     """)
     Long getPCount(
@@ -68,7 +68,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + resource_name
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
         ORDER BY s.eventTimeKST ASC
     """)
@@ -78,8 +78,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
     //start + end + resource_name 갯수
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
     """)
     Long getRCount(
@@ -90,7 +90,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + operation
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.operation = :operation)
         ORDER BY s.eventTimeKST ASC
     """)
@@ -100,8 +100,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
     //start + end + operation 갯수
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.operation = :operation)
     """)
     Long getOCount(
@@ -112,7 +112,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + client_ip
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.clientIp = :clientIp)
         ORDER BY s.eventTimeKST ASC
     """)
@@ -122,8 +122,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
     //start + end + client_ip 갯수
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.clientIp = :clientIp)
     """)
     Long getCCount(
@@ -135,7 +135,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + principal, resource_name
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
         ORDER BY s.eventTimeKST ASC
@@ -147,8 +147,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "resourceName") String resourceName
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
     """)
@@ -162,7 +162,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + principal, operation
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.operation = :operation)
         ORDER BY s.eventTimeKST ASC
@@ -174,8 +174,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "operation") String operation
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.operation = :operation)
     """)
@@ -189,7 +189,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + principal, clientIp
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.clientIp = :clientIp)
         ORDER BY s.eventTimeKST ASC
@@ -201,8 +201,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.clientIp = :clientIp)
     """)
@@ -216,7 +216,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + resource_name, operation
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
         ORDER BY s.eventTimeKST ASC
@@ -228,8 +228,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "operation") String operation
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
     """)
@@ -243,7 +243,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + resource_name, client_ip
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.clientIp = :clientIp)
         ORDER BY s.eventTimeKST ASC
@@ -255,8 +255,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.clientIp = :clientIp)
     """)
@@ -270,7 +270,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     //start + end + operation, client_ip
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
         ORDER BY s.eventTimeKST ASC
@@ -282,8 +282,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
     """)
@@ -298,7 +298,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     /**시간 + 3가지 컬럼*/
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
@@ -313,8 +313,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     );
 
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
@@ -329,7 +329,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
 
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.clientIp = :clientIp)
@@ -343,8 +343,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.clientIp = :clientIp)
@@ -359,7 +359,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
 
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
@@ -373,8 +373,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
@@ -389,7 +389,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
 
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
@@ -403,8 +403,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
           AND (s.clientIp = :clientIp)
@@ -421,7 +421,7 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
     /**시간 + 4개의 컬럼으로 찾기*/
     @Query("""
         SELECT s FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
@@ -437,8 +437,8 @@ public interface SystemLevelFalseRepository extends JpaRepository<SystemLevelFal
             @Param(value = "clientIp") String clientIp
     );
     @Query("""
-        SELECT COUNT(*) FROM SystemLevelFalse s
-        WHERE (s.eventTimeKST >= : start) AND (s.eventTimeKST <= :end)
+        SELECT COUNT(s) FROM SystemLevelFalse s
+        WHERE (s.eventTimeKST >= :start) AND (s.eventTimeKST <= :end)
           AND (s.principal = :principal)
           AND (s.resourceName = :resourceName)
           AND (s.operation = :operation)
