@@ -11,23 +11,29 @@ import java.time.OffsetDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CertifiedNotMove {
-    @Id @Column(columnDefinition="text")
-    private String id;
 
-    @Column(name="client_ip", columnDefinition="text", nullable = false)
-    private String clientIp;
+    /**
+     * certified-notMove:
+     * 인증 실패 후 일정 시간 동안 추가 활동이 없을 경우 발생하는 이벤트를 저장하는 엔티티 테이블
+     */
+
+    @Id @Column(columnDefinition="text")
+    private String id;                      //기본키
+
+    @Column(name="client_ip", columnDefinition="text")
+    private String clientIp;                //비인가 접근을 시도한 클라이언트 ip
 
     @Column(name="alert_time_kst",columnDefinition="timestamptz", nullable = false)
-    private OffsetDateTime alertTimeKST;
+    private OffsetDateTime alertTimeKST;    //비인가 접근 시도한 시간
 
-    @Column(name="alert_type", columnDefinition = "text", nullable = false)
-    private String alertType;
+    @Column(name="alert_type", columnDefinition = "text")
+    private String alertType;               //비인가 접근 유형
 
-    @Column(name="description", columnDefinition = "text", nullable = false)
-    private String description;
+    @Column(name="description", columnDefinition = "text")
+    private String description;             //비인가 접근에 대한 설명
 
-    @Column(name="failure_count", columnDefinition = "BIGINT", nullable = false)
-    private Long failureCount;
+    @Column(name="failure_count", columnDefinition = "BIGINT")
+    private Long failureCount;              //각 유형 별 비인가 접근 횟수
 
 }
 
